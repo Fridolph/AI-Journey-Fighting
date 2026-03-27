@@ -1,6 +1,7 @@
 {
   "name": "ai-journey-fighting",
   "version": "1.0.0",
+  "type": "module",
   "description": "AI学习之旅记录文档",
   "scripts": {
     "docs:dev": "vitepress dev docs",
