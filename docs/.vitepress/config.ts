@@ -8,19 +8,27 @@ export default defineConfig({
     root: {
       label: '简体中文',
       lang: 'zh-CN',
-      link: '/'
+      description: 'AI学习之旅，记录成长的点点滴滴',
+      themeConfig: {
+        nav: [
+          { text: '首页', link: '/' },
+          { text: '学习记录', link: '/zh/agents/' }
+        ]
+      }
     },
     en: {
       label: 'English',
       lang: 'en-US',
-      link: '/en/'
+      description: 'AI Learning Journey, Record Growth',
+      themeConfig: {
+        nav: [
+          { text: 'Home', link: '/en/' },
+          { text: 'Learning Notes', link: '/en/agents/' }
+        ]
+      }
     }
   },
   themeConfig: {
-    nav: [
-      { text: '首页', link: '/' },
-      { text: '学习记录', link: '/zh/agents/' }
-    ],
     sidebar: {
       '/zh/': [
         {
