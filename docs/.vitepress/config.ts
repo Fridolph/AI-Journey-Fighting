@@ -12,7 +12,21 @@ export default defineConfig({
       themeConfig: {
         nav: [
           { text: '首页', link: '/' },
-          { text: '学习记录', link: '/zh/agents/' }
+          { text: '学习记录', link: '/agents/' }
+        ],
+        sidebar: [
+          {
+            text: 'AI学习记录',
+            items: [
+              { text: 'AGENTS 总览', link: '/agents/' },
+              { text: '大模型基础', link: '/agents/foundation/' }
+              // { text: '提示词工程', link: '/agents/prompt-engineering/' },
+              // { text: 'Agent开发', link: '/agents/agent-development/' },
+              // { text: '多模态应用', link: '/agents/multimodal/' },
+              // { text: '项目实战', link: '/agents/projects/' },
+              // { text: '学习资源', link: '/agents/resources/' }
+            ]
+          }
         ]
       }
     },
@@ -22,43 +36,27 @@ export default defineConfig({
       description: 'AI Learning Journey, Record Growth',
       themeConfig: {
         nav: [
-          { text: 'Home', link: '/en/' },
-          { text: 'Learning Notes', link: '/en/agents/' }
+          { text: 'Home', link: '/' },
+          { text: 'Learning Notes', link: '/agents/' }
+        ],
+        sidebar: [
+          {
+            text: 'AI Learning Notes',
+            items: [
+              { text: 'AGENTS Overview', link: '/agents/' },
+              { text: 'LLM Foundation', link: '/agents/foundation/' }
+              // { text: 'Prompt Engineering', link: '/agents/prompt-engineering/' },
+              // { text: 'Agent Development', link: '/agents/agent-development/' },
+              // { text: 'Multimodal Applications', link: '/agents/multimodal/' },
+              // { text: 'Project Practice', link: '/agents/projects/' },
+              // { text: 'Learning Resources', link: '/agents/resources/' }
+            ]
+          }
         ]
       }
     }
   },
   themeConfig: {
-    sidebar: {
-      '/zh/': [
-        {
-          text: 'AI学习记录',
-          items: [
-            { text: 'AGENTS 总览', link: '/zh/agents/' },
-            { text: '大模型基础', link: '/zh/agents/foundation/' }
-            // { text: '提示词工程', link: '/zh/agents/prompt-engineering/' },
-            // { text: 'Agent开发', link: '/zh/agents/agent-development/' },
-            // { text: '多模态应用', link: '/zh/agents/multimodal/' },
-            // { text: '项目实战', link: '/zh/agents/projects/' },
-            // { text: '学习资源', link: '/zh/agents/resources/' }
-          ]
-        }
-      ],
-      '/en/': [
-        {
-          text: 'AI Learning Notes',
-          items: [
-            { text: 'AGENTS Overview', link: '/en/agents/' },
-            { text: 'LLM Foundation', link: '/en/agents/foundation/' }
-            // { text: 'Prompt Engineering', link: '/en/agents/prompt-engineering/' },
-            // { text: 'Agent Development', link: '/en/agents/agent-development/' },
-            // { text: 'Multimodal Applications', link: '/en/agents/multimodal/' },
-            // { text: 'Project Practice', link: '/en/agents/projects/' },
-            // { text: 'Learning Resources', link: '/en/agents/resources/' }
-          ]
-        }
-      ]
-    },
     socialLinks: [
       { icon: 'github', link: 'https://github.com/Fridolph/AI-Journey-Fighting' }
     ]
