@@ -1,32 +1,26 @@
 import { defineConfig } from 'vitepress'
+import mathjax3 from 'markdown-it-mathjax3'
 
 export default defineConfig({
   title: 'AI Journey Fighting',
   description: 'AI学习之旅，记录成长的点点滴滴',
   base: '/AI-Journey-Fighting/',
+  lang: 'zh-CN',
 
-  // Internationalization configuration
-  locales: {
-    '/': {
-      label: '简体中文',
-      lang: 'zh-CN',
-      description: 'AI学习之旅，记录成长的点点滴滴'
-    },
-    '/en/': {
-      label: 'English',
-      lang: 'en-US',
-      description: 'AI Learning Journey, Record Growth'
+  // Markdown configuration
+  markdown: {
+    config: (md) => {
+      md.use(mathjax3)
     }
   },
 
   themeConfig: {
-    // Global navigation (will be overridden per locale if needed)
     nav: [
       { text: '首页', link: '/' },
-      { text: '学习记录', link: '/agents/' }
+      { text: '学习记录', link: '/agents/' },
+      { text: 'English', link: '/en/' }
     ],
 
-    // Sidebar configuration per locale
     sidebar: {
       '/': [
         {
