@@ -1,5 +1,5 @@
 # Prompt Engineering
+This section records learning content related to prompt engineering.
 
-This section records prompt-related techniques and best practices.
-
-## Content coming soon...
+## Article List
+- [22 · Prompt Engineering · The Way of Communication Paradigm](./22-prompt-engineering.md)
