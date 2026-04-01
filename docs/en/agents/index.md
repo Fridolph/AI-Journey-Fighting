@@ -57,4 +57,5 @@ This is the collection of all my AI learning content, organized by different dom
 
 ## 📅 Recent Updates
 
+- 2026-04-01: Added [Concept 22 · Prompt Engineering], completed learning of communication paradigm
 - 2026-03-26: Project initialization, completed VitePress documentation site setup
