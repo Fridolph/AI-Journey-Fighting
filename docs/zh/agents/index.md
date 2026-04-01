@@ -6,13 +6,13 @@
 
 ## 📑 目录导航
 
-### 1. [大模型基础](./foundation/)
+### 1. [大模型基础](/zh/agents/foundation/)
 - 深度学习基础理论
 - Transformer架构详解
 - 大语言模型发展历程
 - 模型训练与微调技术
 
-### 2. [提示词工程](./prompt-engineering/)
+### 2. [提示词工程](/zh/agents/prompt-engineering/)
 - 基础提示词技巧
 - 思维链(Chain of Thought)
 - 少样本/零样本学习

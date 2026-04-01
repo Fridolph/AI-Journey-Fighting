@@ -6,13 +6,13 @@ This is the collection of all my AI learning content, organized by different dom
 
 ## 📑 Table of Contents
 
-### 1. [LLM Foundation](./foundation/)
+### 1. [LLM Foundation](/en/agents/foundation/)
 - Deep Learning fundamentals
 - Transformer architecture explained
 - Large Language Model development history
 - Model training and fine-tuning techniques
 
-### 2. [Prompt Engineering](./prompt-engineering/)
+### 2. [Prompt Engineering](/en/agents/prompt-engineering/)
 - Basic prompt techniques
 - Chain of Thought
 - Few-shot/Zero-shot learning

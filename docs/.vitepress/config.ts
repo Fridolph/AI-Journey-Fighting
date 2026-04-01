@@ -17,22 +17,22 @@ export default defineConfig({
   themeConfig: {
     nav: [
       { text: '首页', link: '/' },
-      { text: '学习记录', link: '/agents/' },
+      { text: '学习记录', link: '/zh/agents/' },
       { text: 'English', link: '/en/' }
     ],
 
     sidebar: {
-      '/': [
+      '/zh/': [
         {
           text: 'AI学习记录',
           items: [
-            { text: 'AGENTS 总览', link: '/agents/' },
-            { text: '大模型基础', link: '/agents/foundation/' },
-            { text: '提示词工程', link: '/agents/prompt-engineering/' }
-            // { text: 'Agent开发', link: '/agents/agent-development/' },
-            // { text: '多模态应用', link: '/agents/multimodal/' },
-            // { text: '项目实战', link: '/agents/projects/' },
-            // { text: '学习资源', link: '/agents/resources/' }
+            { text: 'AGENTS 总览', link: '/zh/agents/' },
+            { text: '大模型基础', link: '/zh/agents/foundation/' },
+            { text: '提示词工程', link: '/zh/agents/prompt-engineering/' }
+            // { text: 'Agent开发', link: '/zh/agents/agent-development/' },
+            // { text: '多模态应用', link: '/zh/agents/multimodal/' },
+            // { text: '项目实战', link: '/zh/agents/projects/' },
+            // { text: '学习资源', link: '/zh/agents/resources/' }
           ]
         }
       ],
