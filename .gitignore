@@ -141,3 +141,5 @@ vite.config.ts.timestamp-*
 .env
 .env.Local
 !.env.example
+.minio.sys
+volumes

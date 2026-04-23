@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Milvus RAG SSE Demo</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family:
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          sans-serif;
+        background: #0f172a;
+        color: #e2e8f0;
+      }
+
+      .page {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 24px 16px 40px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 28px;
+      }
+
+      .sub {
+        margin: 0 0 20px;
+        color: #94a3b8;
+        line-height: 1.6;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 360px 1fr;
+        gap: 16px;
+      }
+
+      .card {
+        background: rgba(15, 23, 42, 0.75);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: 0 12px 36px rgba(15, 23, 42, 0.28);
+      }
+
+      .card h2 {
+        margin: 0 0 14px;
+        font-size: 16px;
+      }
+
+      label {
+        display: block;
+        margin: 0 0 6px;
+        font-size: 13px;
+        color: #cbd5e1;
+      }
+
+      textarea,
+      input {
+        width: 100%;
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        background: #111827;
+        color: #e5e7eb;
+        border-radius: 10px;
+        padding: 10px 12px;
+        outline: none;
+        font: inherit;
+      }
+
+      textarea {
+        min-height: 110px;
+        resize: vertical;
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      button {
+        border: 0;
+        border-radius: 999px;
+        padding: 10px 16px;
+        font: inherit;
+        cursor: pointer;
+      }
+
+      .btn-primary {
+        background: #2563eb;
+        color: #fff;
+      }
+
+      .btn-ghost {
+        background: #1e293b;
+        color: #cbd5e1;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+      }
+
+      .status {
+        margin-top: 12px;
+        font-size: 13px;
+        color: #93c5fd;
+      }
+
+      .panel {
+        display: grid;
+        gap: 16px;
+      }
+
+      .answer {
+        min-height: 180px;
+        white-space: pre-wrap;
+        line-height: 1.7;
+      }
+
+      .log,
+      .answer {
+        background: #020617;
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.15);
+        padding: 12px;
+      }
+
+      .log {
+        max-height: 220px;
+        overflow: auto;
+        font-size: 13px;
+        color: #cbd5e1;
+      }
+
+      .retrieved-list {
+        display: grid;
+        gap: 10px;
+      }
+
+      .snippet {
+        padding: 12px;
+        border-radius: 12px;
+        background: #020617;
+        border: 1px solid rgba(148, 163, 184, 0.15);
+      }
+
+      .snippet-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 8px;
+        color: #93c5fd;
+        font-size: 13px;
+      }
+
+      .snippet-body {
+        color: #e2e8f0;
+        line-height: 1.6;
+        font-size: 14px;
+        max-height: 220px;
+        overflow: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+        padding-right: 4px;
+      }
+
+      .tip {
+        margin-top: 10px;
+        font-size: 12px;
+        color: #94a3b8;
+        line-height: 1.6;
+      }
+
+      @media (max-width: 960px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <h1>Milvus RAG 回答流式交互（SSE）Demo</h1>
+      <p class="sub">
+        这个页面不会展示模型隐藏推理，只展示用户可见的阶段进度、召回片段和流式回答，用来缓解“像卡住了一样”的等待体验。
+      </p>
+
+      <div class="layout">
+        <section class="card">
+          <h2>请求参数</h2>
+          <label for="question">问题</label>
+          <textarea id="question">天龙八部里谁的武功最强？</textarea>
+
+          <div class="row" style="margin-top: 12px">
+            <div>
+              <label for="chunkSize">chunkSize</label>
+              <input id="chunkSize" value="800" />
+            </div>
+            <div>
+              <label for="topK">topK</label>
+              <input id="topK" value="5" />
+            </div>
+          </div>
+
+          <div class="row" style="margin-top: 12px">
+            <div>
+              <label for="bookCode">bookCode</label>
+              <input id="bookCode" value="tlbb" />
+            </div>
+            <div>
+              <label for="collection">collection（可选）</label>
+              <input id="collection" placeholder="留空则自动拼接默认名称" />
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn-primary" id="sendBtn">开始流式回答</button>
+            <button class="btn-ghost" id="stopBtn">停止</button>
+          </div>
+
+          <div class="status" id="status">状态：待机</div>
+          <div class="tip">
+            推荐一次只问一个问题。SSE 适合把“检索中 → 已召回 → 正在生成”连续反馈给用户，而不是让页面长时间静止。
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="card">
+            <h2>阶段日志</h2>
+            <div class="log" id="log"></div>
+          </div>
+
+          <div class="card">
+            <h2>召回片段</h2>
+            <div class="retrieved-list" id="retrieved"></div>
+          </div>
+
+          <div class="card">
+            <h2>流式回答</h2>
+            <div class="answer" id="answer"></div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      const questionEl = document.getElementById('question')
+      const chunkSizeEl = document.getElementById('chunkSize')
+      const topKEl = document.getElementById('topK')
+      const bookCodeEl = document.getElementById('bookCode')
+      const collectionEl = document.getElementById('collection')
+      const sendBtn = document.getElementById('sendBtn')
+      const stopBtn = document.getElementById('stopBtn')
+      const statusEl = document.getElementById('status')
+      const logEl = document.getElementById('log')
+      const retrievedEl = document.getElementById('retrieved')
+      const answerEl = document.getElementById('answer')
+
+      let es = null
+
+      function appendLog(text) {
+        logEl.textContent += `${text}\n`
+        logEl.scrollTop = logEl.scrollHeight
+      }
+
+      function resetUi() {
+        logEl.textContent = ''
+        retrievedEl.innerHTML = ''
+        answerEl.textContent = ''
+      }
+
+      function closeSource() {
+        if (es) {
+          es.close()
+          es = null
+        }
+        statusEl.textContent = '状态：已停止'
+      }
+
+      function renderRetrieved(results) {
+        retrievedEl.innerHTML = ''
+
+        if (!results.length) {
+          retrievedEl.innerHTML = '<div class="snippet">没有召回到片段</div>'
+          return
+        }
+
+        results.forEach((item) => {
+          const div = document.createElement('div')
+          div.className = 'snippet'
+          div.innerHTML = `
+            <div class="snippet-head">
+              <span>片段 ${item.rank} · 第 ${item.chapterNum} 章 · index ${item.chunkIndex}</span>
+              <span>score ${item.score}</span>
+            </div>
+            <div class="snippet-body">${item.content}</div>
+          `
+          retrievedEl.appendChild(div)
+        })
+      }
+
+      function startStream() {
+        const question = questionEl.value.trim()
+        if (!question) {
+          alert('请先输入问题')
+          return
+        }
+
+        if (es) {
+          es.close()
+        }
+
+        resetUi()
+        statusEl.textContent = '状态：连接中…'
+
+        const params = new URLSearchParams({
+          question,
+          chunkSize: chunkSizeEl.value.trim() || '800',
+          topK: topKEl.value.trim() || '5',
+          bookCode: bookCodeEl.value.trim() || 'tlbb',
+        })
+
+        const collection = collectionEl.value.trim()
+        if (collection) {
+          params.set('collection', collection)
+        }
+
+        es = new EventSource(`/api/chat/stream?${params.toString()}`)
+
+        es.addEventListener('meta', (event) => {
+          const data = JSON.parse(event.data)
+          statusEl.textContent = '状态：已连接'
+          appendLog(`已连接 collection: ${data.collectionName}`)
+          appendLog(`chunkSize=${data.chunkSize}, chunkOverlap=${data.chunkOverlap}, topK=${data.topK}`)
+        })
+
+        es.addEventListener('phase', (event) => {
+          const data = JSON.parse(event.data)
+          appendLog(data.message)
+          statusEl.textContent = `状态：${data.message}`
+        })
+
+        es.addEventListener('retrieved', (event) => {
+          const data = JSON.parse(event.data)
+          appendLog(`已召回 ${data.count} 个片段`)
+          renderRetrieved(data.results || [])
+        })
+
+        es.addEventListener('token', (event) => {
+          const data = JSON.parse(event.data)
+          answerEl.textContent += data.text || ''
+        })
+
+        es.addEventListener('done', (event) => {
+          const data = JSON.parse(event.data)
+          appendLog(`完成，用时 ${data.elapsedMs} ms`)
+          statusEl.textContent = `状态：完成（${data.elapsedMs} ms）`
+          closeSource()
+        })
+
+        es.addEventListener('error', (event) => {
+          try {
+            const data = JSON.parse(event.data)
+            appendLog(`错误：${data.message}`)
+            statusEl.textContent = `状态：错误 - ${data.message}`
+          } catch {
+            appendLog('连接发生错误')
+            statusEl.textContent = '状态：连接发生错误'
+          }
+          closeSource()
+        })
+
+        es.onerror = () => {
+          if (es) {
+            appendLog('连接结束')
+            closeSource()
+          }
+        }
+      }
+
+      sendBtn.addEventListener('click', startStream)
+      stopBtn.addEventListener('click', closeSource)
+      window.addEventListener('beforeunload', closeSource)
+    </script>
+  </body>
+</html>
