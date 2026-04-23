@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>成都世纪城附近酒店 - 索引</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+        }
+        .hotel-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .hotel-item {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: transform 0.2s ease;
+        }
+        .hotel-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .hotel-thumbnail {
+            width: 150px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+        .hotel-content {
+            flex: 1;
+        }
+        .hotel-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        .hotel-address {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+        .hotel-rating {
+            color: #f39c12;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .view-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.9em;
+        }
+        .view-btn:hover {
+            background: #2980b9;
+        }
+        .instructions {
+            background: #fff8e1;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>成都世纪城附近酒店展示</h1>
+        
+        <div class="instructions">
+            <p><strong>使用说明：</strong>点击每个酒店下方的"查看详情"按钮，将在新标签页中打开该酒店的详细信息页面。</p>
+            <p>每个酒店页面都已设置正确的酒店名称作为页面标题。</p>
+        </div>
+        
+        <div class="hotel-list">
+            <!-- 酒店1 -->
+            <div class="hotel-item">
+                <img src="https://store.is.autonavi.com/showpic/500be110ed9c4c21c9adaa2ef6825f2c" 
+                     alt="三只猫青年旅社" 
+                     class="hotel-thumbnail">
+                <div class="hotel-content">
+                    <div class="hotel-title">1. 三只猫青年旅社(世纪城地铁站店)</div>
+                    <div class="hotel-address">地址：天府大道中段天鹅湖公寓25栋2单元1502室</div>
+                    <div class="hotel-rating">评分：★★★★☆ 4.5分</div>
+                    <a href="hotel1.html" target="_blank" class="view-btn">查看详情</a>
+                </div>
+            </div>
+
+            <!-- 酒店2 -->
+            <div class="hotel-item">
+                <img src="https://store.is.autonavi.com/showpic/3c9ca69aecfa142214b13036c4996f9c" 
+                     alt="悦栖青年旅社" 
+                     class="hotel-thumbnail">
+                <div class="hotel-content">
+                    <div class="hotel-title">2. 悦栖青年旅社(世纪城地铁站店)</div>
+                    <div class="hotel-address">地址：天府大道天鹅湖公寓25栋2单元25-2号</div>
+                    <div class="hotel-rating">评分：★★★★★ 4.8分</div>
+                    <a href="hotel2.html" target="_blank" class="view-btn">查看详情</a>
+                </div>
+            </div>
+
+            <!-- 酒店3 -->
+            <div class="hotel-item">
+                <img src="https://store.is.autonavi.com/showpic/494043f29d1ace0b9a672eff81fae1d6" 
+                     alt="成都世纪精品公寓" 
+                     class="hotel-thumbnail">
+                <div class="hotel-content">
+                    <div class="hotel-title">3. 成都世纪精品公寓会展中心店</div>
+                    <div class="hotel-address">地址：天府大道中段177号天鹅湖公寓</div>
+                    <div class="hotel-rating">评分：★★★★☆ 4.3分</div>
+                    <a href="hotel3.html" target="_blank" class="view-btn">查看详情</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 自动为所有链接添加target="_blank"属性
+        document.querySelectorAll('.view-btn').forEach(link => {
+            link.setAttribute('target', '_blank');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>成都世纪城附近酒店图片汇总</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .hotel-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        .tab-btn {
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+            font-size: 1em;
+        }
+        .tab-btn:hover {
+            background: #2980b9;
+        }
+        .tab-btn.active {
+            background: #2c3e50;
+        }
+        .hotel-content {
+            display: none;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .hotel-content.active {
+            display: block;
+        }
+        .hotel-large-image {
+            max-width: 90%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .hotel-details {
+            text-align: left;
+            margin-top: 20px;
+        }
+        .detail-item {
+            margin-bottom: 10px;
+            padding: 8px 0;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #555;
+            margin-right: 10px;
+        }
+        .detail-value {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>成都世纪城附近酒店图片汇总</h1>
+        
+        <div class="hotel-tabs">
+            <button class="tab-btn active" onclick="showHotel(1)">三只猫青年旅社</button>
+            <button class="tab-btn" onclick="showHotel(2)">悦栖青年旅社</button>
+            <button class="tab-btn" onclick="showHotel(3)">成都世纪精品公寓</button>
+        </div>
+
+        <!-- 酒店1内容 -->
+        <div class="hotel-content active" id="hotel1-content">
+            <h2>三只猫青年旅社(世纪城地铁站店)</h2>
+            <img src="https://store.is.autonavi.com/showpic/500be110ed9c4c21c9adaa2ef6825f2c" 
+                 alt="三只猫青年旅社" 
+                 class="hotel-large-image">
+            <div class="hotel-details">
+                <div class="detail-item">
+                    <span class="detail-label">地址：</span>
+                    <span class="detail-value">天府大道中段天鹅湖公寓25栋2单元1502室</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">评分：</span>
+                    <span class="detail-value">★★★★☆ 4.5分</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">类型：</span>
+                    <span class="detail-value">青年旅社</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">距离：</span>
+                    <span class="detail-value">约100米（距离成都世纪城）</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 酒店2内容 -->
+        <div class="hotel-content" id="hotel2-content">
+            <h2>悦栖青年旅社(世纪城地铁站店)</h2>
+            <img src="https://store.is.autonavi.com/showpic/3c9ca69aecfa142214b13036c4996f9c" 
+                 alt="悦栖青年旅社" 
+                 class="hotel-large-image">
+            <div class="hotel-details">
+                <div class="detail-item">
+                    <span class="detail-label">地址：</span>
+                    <span class="detail-value">天府大道天鹅湖公寓25栋2单元25-2号</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">评分：</span>
+                    <span class="detail-value">★★★★★ 4.8分</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">类型：</span>
+                    <span class="detail-value">青年旅社</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">距离：</span>
+                    <span class="detail-value">约120米（距离成都世纪城）</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 酒店3内容 -->
+        <div class="hotel-content" id="hotel3-content">
+            <h2>成都世纪精品公寓会展中心店</h2>
+            <img src="https://store.is.autonavi.com/showpic/494043f29d1ace0b9a672eff81fae1d6" 
+                 alt="成都世纪精品公寓" 
+                 class="hotel-large-image">
+            <div class="hotel-details">
+                <div class="detail-item">
+                    <span class="detail-label">地址：</span>
+                    <span class="detail-value">天府大道中段177号天鹅湖公寓</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">评分：</span>
+                    <span class="detail-value">★★★★☆ 4.3分</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">类型：</span>
+                    <span class="detail-value">精品公寓</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">距离：</span>
+                    <span class="detail-value">约150米（距离成都世纪城）</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showHotel(hotelNumber) {
+            // 更新按钮状态
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn')[hotelNumber-1].classList.add('active');
+            
+            // 更新内容显示
+            document.querySelectorAll('.hotel-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`hotel${hotelNumber}-content`).classList.add('active');
+            
+            // 更新页面标题
+            let hotelNames = [
+                "三只猫青年旅社(世纪城地铁站店)",
+                "悦栖青年旅社(世纪城地铁站店)",
+                "成都世纪精品公寓会展中心店"
+            ];
+            document.title = hotelNames[hotelNumber-1];
+        }
+        
+        // 初始设置第一个酒店的标题
+        document.title = "三只猫青年旅社(世纪城地铁站店)";
+    </script>
+</body>
+</html>
