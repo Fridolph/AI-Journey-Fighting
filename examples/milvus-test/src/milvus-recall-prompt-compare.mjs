@@ -4,6 +4,8 @@ import { fileURLToPath } from 'url'
 import dotenv from 'dotenv'
 import { MilvusClient, MetricType } from '@zilliz/milvus2-sdk-node'
 import { ChatOpenAI, OpenAIEmbeddings } from '@langchain/openai'
+import { EPubLoader } from '@langchain/community/document_loaders/fs/epub'
+import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -20,6 +22,7 @@ const DEFAULT_SPLITTER_CODE = 'rcs'
 const DEFAULT_VERSION = 'v1'
 const DEFAULT_CHUNK_SIZE = 800
 const DEFAULT_TOP_K = 5
+const DEFAULT_EPUB_FILE = './天龙八部.epub'
 
 const QUESTIONS = [
   '天龙八部里谁的武功最强？',
@@ -104,6 +107,8 @@ function parseArgs(argv) {
     strategy: 'strict',
     compareStrategies: false,
     saveTo: '',
+    snapshotFile: '',
+    epub: DEFAULT_EPUB_FILE,
   }
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -180,6 +185,16 @@ function parseArgs(argv) {
     if (arg === '--saveTo') {
       options.saveTo = argv[index + 1]
       index += 1
+      continue
+    }
+    if (arg === '--snapshotFile') {
+      options.snapshotFile = argv[index + 1]
+      index += 1
+      continue
+    }
+    if (arg === '--epub') {
+      options.epub = argv[index + 1]
+      index += 1
     }
   }
 
@@ -255,6 +270,10 @@ AI 助手的回答：`
 }
 
 function getQuestionsToRun(options) {
+  if (options.snapshotFile) {
+    return []
+  }
+
   if (options.all) {
     return QUESTIONS.map((question, index) => ({
       label: `Q${index + 1}`,
@@ -277,6 +296,142 @@ function getQuestionsToRun(options) {
       question: QUESTIONS[options.questionIndex - 1],
     },
   ]
+}
+
+function parseSnapshotFile(snapshotFile) {
+  const raw = fs.readFileSync(snapshotFile, 'utf8')
+  const lines = raw.split('\n')
+  const questions = []
+  let currentQuestion = null
+  let currentSnippet = null
+
+  for (const line of lines) {
+    const questionMatch = line.match(/^(Q\d+):\s+(.+)$/)
+    if (questionMatch) {
+      if (currentSnippet && currentQuestion) {
+        currentQuestion.snippets.push(currentSnippet)
+        currentSnippet = null
+      }
+      if (currentQuestion) {
+        questions.push(currentQuestion)
+      }
+      currentQuestion = {
+        label: questionMatch[1],
+        question: questionMatch[2].trim(),
+        snippets: [],
+      }
+      continue
+    }
+
+    if (!currentQuestion) {
+      continue
+    }
+
+    if (line.startsWith('【AI 回答】')) {
+      if (currentSnippet) {
+        currentQuestion.snippets.push(currentSnippet)
+        currentSnippet = null
+      }
+      continue
+    }
+
+    const snippetMatch = line.match(/^\[片段 (\d+)\] 相似度: ([\d.]+)$/)
+    if (snippetMatch) {
+      if (currentSnippet) {
+        currentQuestion.snippets.push(currentSnippet)
+      }
+      currentSnippet = {
+        rank: Number(snippetMatch[1]),
+        score: Number(snippetMatch[2]),
+        id: '',
+        book: '',
+        chapter_num: 0,
+        index: 0,
+      }
+      continue
+    }
+
+    if (!currentSnippet) {
+      continue
+    }
+
+    if (line.startsWith('ID: ')) {
+      currentSnippet.id = line.slice(4).trim()
+      continue
+    }
+
+    if (line.startsWith('书籍: ')) {
+      currentSnippet.book = line.slice(4).trim()
+      continue
+    }
+
+    const chapterMatch = line.match(/^章节: 第 (\d+) 章$/)
+    if (chapterMatch) {
+      currentSnippet.chapter_num = Number(chapterMatch[1])
+      continue
+    }
+
+    const indexMatch = line.match(/^片段索引: (\d+)$/)
+    if (indexMatch) {
+      currentSnippet.index = Number(indexMatch[1])
+    }
+  }
+
+  if (currentSnippet && currentQuestion) {
+    currentQuestion.snippets.push(currentSnippet)
+  }
+
+  if (currentQuestion) {
+    questions.push(currentQuestion)
+  }
+
+  return questions
+}
+
+async function rebuildSnapshotResults(snapshotQuestions, epubFile, chunkSize, chunkOverlap) {
+  const loader = new EPubLoader(epubFile, {
+    splitChapters: true,
+  })
+  const documents = await loader.load()
+  const splitter = new RecursiveCharacterTextSplitter({
+    chunkSize,
+    chunkOverlap,
+  })
+
+  const chapterChunks = []
+
+  for (const document of documents) {
+    chapterChunks.push(await splitter.splitText(document.pageContent))
+  }
+
+  return snapshotQuestions.map((item) => {
+    const results = item.snippets.map((snippet) => {
+      const chunks = chapterChunks[snippet.chapter_num - 1] || []
+      const content = chunks[snippet.index]
+
+      if (!content) {
+        throw new Error(
+          `无法从 EPUB 还原片段：${item.label} / 第 ${snippet.chapter_num} 章 / 片段 ${snippet.index}`,
+        )
+      }
+
+      return {
+        score: snippet.score,
+        id: snippet.id,
+        book_id: DEFAULT_BOOK_ID,
+        book_name: DEFAULT_BOOK_CODE,
+        chapter_num: snippet.chapter_num,
+        index: snippet.index,
+        content,
+      }
+    })
+
+    return {
+      label: item.label,
+      question: item.question,
+      results,
+    }
+  })
 }
 
 const options = parseArgs(process.argv.slice(2))
@@ -311,9 +466,11 @@ const model = new ChatOpenAI({
   },
 })
 
-const client = new MilvusClient({
-  address: 'localhost:19530',
-})
+const client = options.snapshotFile
+  ? null
+  : new MilvusClient({
+      address: 'localhost:19530',
+    })
 
 async function getEmbedding(text) {
   return embeddings.embedQuery(text)
@@ -395,31 +552,56 @@ async function run() {
   write(`topK: ${options.topK}`)
   write(`compareStrategies: ${options.compareStrategies}`)
   write(`strategy: ${options.strategy}`)
-
-  write('\n连接 Milvus...')
-  await client.connectPromise
-  write('✓ 已连接')
-  await ensureCollectionLoaded()
-  write('✓ 集合已加载')
+  write(`snapshotFile: ${options.snapshotFile || '无'}`)
 
   const strategiesToRun = options.compareStrategies
     ? ['strict', 'balanced', 'inferential']
     : [options.strategy]
+  let questionRuns = []
 
-  const questions = getQuestionsToRun(options)
+  if (options.snapshotFile) {
+    write('\n读取召回快照...')
+    const snapshotQuestions = parseSnapshotFile(options.snapshotFile)
+    write(`✓ 已读取 ${snapshotQuestions.length} 道题目的召回快照`)
+    write('根据 EPUB 重新切块还原完整片段...')
+    questionRuns = await rebuildSnapshotResults(
+      snapshotQuestions,
+      options.epub,
+      options.chunkSize,
+      options.chunkOverlap,
+    )
+    write('✓ 已还原完整片段')
+  } else {
+    write('\n连接 Milvus...')
+    await client.connectPromise
+    write('✓ 已连接')
+    await ensureCollectionLoaded()
+    write('✓ 集合已加载')
 
-  for (const item of questions) {
+    const questions = getQuestionsToRun(options)
+    questionRuns = []
+
+    for (const item of questions) {
+      const results = await retrieveRelevantContent(item.question)
+      questionRuns.push({
+        label: item.label,
+        question: item.question,
+        results,
+      })
+    }
+  }
+
+  for (const item of questionRuns) {
     write('\n' + '='.repeat(80))
     write(`${item.label}: ${item.question}`)
     write('='.repeat(80))
 
     write('\n【检索相关内容】')
-    const results = await retrieveRelevantContent(item.question)
-    printRetrievedContent(results, write)
+    printRetrievedContent(item.results, write)
 
     for (const strategyKey of strategiesToRun) {
       write(`\n【Prompt 策略：${strategyKey} / ${PROMPT_STRATEGIES[strategyKey].title}】`)
-      const answer = await answerWithStrategy(strategyKey, item.question, results)
+      const answer = await answerWithStrategy(strategyKey, item.question, item.results)
       write(String(answer))
     }
   }

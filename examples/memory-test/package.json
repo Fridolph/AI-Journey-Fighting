@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "node ./src/history-test2.mjs"
+    "dev": "node ./src/memory/retrieval-memory.pro.mjs"
   },
   "keywords": [],
   "author": "",
