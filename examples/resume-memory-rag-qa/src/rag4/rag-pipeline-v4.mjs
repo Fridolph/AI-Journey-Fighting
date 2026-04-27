@@ -52,7 +52,7 @@ function preferredSectionsForStrategy(strategy) {
   return ['projects', 'work_experience', 'skills', 'core_strengths', 'profile'];
 }
 
-function detectNoiseReasons(item, leader, strategy, questionKeywords) {
+function detectNoiseReasons(item, leader, strategy, questionKeywords, options = {}) {
   // 这个函数不直接决定“留还是删”，
   // 而是先为每条记录打上“可能是噪音的原因”。
   //
@@ -60,7 +60,9 @@ function detectNoiseReasons(item, leader, strategy, questionKeywords) {
   // 因为学习阶段最重要的是“可解释性”：
   // 你不仅要知道某条被丢了，还要知道它为什么被判成噪音。
   const reasons = [];
-  const preferredSections = preferredSectionsForStrategy(strategy);
+  const preferredSections = Array.isArray(options.preferredSections)
+    ? options.preferredSections
+    : preferredSectionsForStrategy(strategy);
   const isPreferredSection = preferredSections.includes(item.section);
   const hasHints = Number(item._matchedHintCount || 0) > 0;
   // rerankGap：与头部第一名结果的分差。
@@ -102,12 +104,12 @@ function detectNoiseReasons(item, leader, strategy, questionKeywords) {
     reasons.push('与头部结果分差过大');
   }
 
-  if (rawScore < 0.48) {
+  if (rawScore < Number(options.rawScoreNoiseThreshold ?? 0.48)) {
     // 这里同样只是当前数据集下的经验阈值，不是通用真理。
     reasons.push('原始向量分偏低');
   }
 
-  if (rerankScore < 0.6) {
+  if (rerankScore < Number(options.rerankScoreNoiseThreshold ?? 0.6)) {
     reasons.push('重排后分数偏低');
   }
 
@@ -136,14 +138,22 @@ export function denoiseMatches(matches, question, strategy, options = {}) {
   }
 
   const leader = matches[0];
-  const questionKeywords = extractQuestionKeywords(question);
-  const preferredSections = preferredSectionsForStrategy(strategy);
+  const questionKeywords = Array.isArray(options.questionKeywords)
+    ? options.questionKeywords
+    : extractQuestionKeywords(question);
+  const preferredSections = Array.isArray(options.preferredSections)
+    ? options.preferredSections
+    : preferredSectionsForStrategy(strategy);
   // minKeep 是一个兜底参数：
   // 防止去噪过猛，最后 prompt 里几乎没证据可用。
   const minKeep = Number(options.minKeep || 4);
 
   const inspected = matches.map((item) => {
-    const reasons = detectNoiseReasons(item, leader, strategy, questionKeywords);
+    const reasons = detectNoiseReasons(item, leader, strategy, questionKeywords, {
+      preferredSections,
+      rawScoreNoiseThreshold: options.rawScoreNoiseThreshold,
+      rerankScoreNoiseThreshold: options.rerankScoreNoiseThreshold,
+    });
     const isPreferredSection = preferredSections.includes(item.section);
     const hasHints = Number(item._matchedHintCount || 0) > 0;
 
@@ -154,7 +164,10 @@ export function denoiseMatches(matches, question, strategy, options = {}) {
     const keep =
       reasons.length <= 2 ||
       hasHints ||
-      (isPreferredSection && Number(item._rerankScore || 0) >= 0.63);
+      (
+        isPreferredSection &&
+        Number(item._rerankScore || 0) >= Number(options.preferredSectionKeepScore ?? 0.63)
+      );
 
     return {
       ...item,
