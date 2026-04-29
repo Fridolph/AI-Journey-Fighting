@@ -22,6 +22,13 @@
 
 > 约定：`examples/` 下的原始教程示例默认保留不改；兼容修复、调试版本、学习注释版优先新建文件，与原文件形成对照。
 
+## 🚀 文档发布
+
+- 文档站基于 VitePress，构建命令是 `npm run docs:build`
+- 每次推送到 `main`，都会自动触发 `.github/workflows/deploy.yml`
+- Workflow 会构建并上传 `docs/.vitepress/dist`，然后发布到当前仓库的 GitHub Pages
+- 仓库首次启用时，需要在 GitHub 仓库设置中将 Pages Source 设为 `GitHub Actions`
+
 ## 📁 目录结构（核心）
 
 ```text
