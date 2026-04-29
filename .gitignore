@@ -146,3 +146,5 @@ volumes
 backups/
 examples/resume-memory-rag-qa/.runtime/
 examples/resume-memory-rag-qa/**/.runtime/
+
+.playwright-mcp

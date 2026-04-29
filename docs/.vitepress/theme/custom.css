@@ -1,0 +1,29 @@
+.ai-concept-map-page .VPDoc,
+.ai-concept-map-page .VPPage {
+  padding: 0;
+}
+
+.ai-concept-map-page .VPDoc .container,
+.ai-concept-map-page .VPDoc .content,
+.ai-concept-map-page .VPDoc .content-container,
+.ai-concept-map-page .VPDoc .main,
+.ai-concept-map-page .VPPage .container,
+.ai-concept-map-page .VPPage .content {
+  width: 100%;
+  max-width: none;
+}
+
+.ai-concept-map-page .VPDoc .main,
+.ai-concept-map-page .VPPage .container {
+  padding: 0;
+}
+
+.ai-concept-map-page .VPDoc .content-container {
+  margin: 0;
+}
+
+@media (min-width: 961px) {
+  .ai-concept-map-page .VPNavBar.has-sidebar .content {
+    padding-left: 32px;
+  }
+}

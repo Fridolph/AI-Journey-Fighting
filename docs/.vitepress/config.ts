@@ -18,35 +18,55 @@ export default defineConfig({
     nav: [
       { text: '首页', link: '/' },
       { text: '学习记录', link: '/zh/agents/' },
-      { text: 'English', link: '/en/' }
+      { text: '已发表文章', link: '/zh/articles/' },
+      { text: '概念地图', link: '/zh/agents/concept-map/' },
     ],
 
     sidebar: {
+      '/zh/articles/': [
+        {
+          text: '已发表文章',
+          items: [
+            { text: '文章总览', link: '/zh/articles/' },
+            { text: '一、提示链、路由、并行化', link: '/zh/articles/2026-03-01__learn-ai-1/' },
+            { text: '二、反思、工具使用、规划', link: '/zh/articles/2026-03-02__learn-ai-2/' },
+            { text: '三、多智能体、记忆管理与学习适应', link: '/zh/articles/2026-03-08__learn-ai-3/' },
+            { text: '四、MCP：给AI工具世界造一个USB接口', link: '/zh/articles/2026-03-12__learn-ai-4/' },
+            { text: '五、目标、监控与容错', link: '/zh/articles/2026-03-15__learn-ai-5/' },
+            { text: '六、Human-in-the-Loop 设计', link: '/zh/articles/2026-03-17__learn-ai-6/' },
+            { text: '七、深入理解 RAG', link: '/zh/articles/2026-03-17__learn-ai-7/' },
+            { text: '八、A2A 协议完全指南', link: '/zh/articles/2026-03-17__learn-ai-8/' },
+            { text: '九、Multi-Agent 系统设计：架构与编排', link: '/zh/articles/2026-03-24__learn-ai-9/' },
+            { text: '十、Multi-Agent 系统设计：成本优化与容错机制', link: '/zh/articles/2026-03-27__learn-ai-10/' },
+            { text: '十一、Multi-Agent 系统设计：可观测性与生产实践', link: '/zh/articles/2026-03-29__learn-ai-11/' },
+            { text: '十二、RAG 知识库设计', link: '/zh/articles/2026-04-04__learn-ai-12/' },
+            { text: '十三、Agent 安全：给 AI 装上护栏', link: '/zh/articles/2026-04-07__learn-ai-13/' },
+            { text: '十四、从零推导 Multi-Agent 架构设计', link: '/zh/articles/2026-04-10__learn-ai-14/' },
+            { text: '二十一、从零推导 Agent 工作机制', link: '/zh/articles/2026-04-12__learn-ai-15/' }
+          ]
+        }
+      ],
       '/zh/': [
         {
           text: 'AI学习记录',
           items: [
             { text: 'AGENTS 总览', link: '/zh/agents/' },
+            { text: 'AI 概念地图', link: '/zh/agents/concept-map/' },
+            { text: '概念地图维护说明', link: '/zh/agents/concept-map/maintain' },
             { text: '大模型基础', link: '/zh/agents/foundation/' },
-            { text: '提示词工程', link: '/zh/agents/prompt-engineering/' }
-            // { text: 'Agent开发', link: '/zh/agents/agent-development/' },
-            // { text: '多模态应用', link: '/zh/agents/multimodal/' },
-            // { text: '项目实战', link: '/zh/agents/projects/' },
-            // { text: '学习资源', link: '/zh/agents/resources/' }
+            { text: '提示词工程', link: '/zh/agents/prompt-engineering/' },
+            { text: 'Agent开发', link: '/zh/agents/agent-development/' },
+            { text: '多模态应用', link: '/zh/agents/multimodal/' },
+            { text: '项目实战', link: '/zh/agents/projects/' },
+            { text: '学习资源', link: '/zh/agents/resources/' }
           ]
-        }
-      ],
-      '/en/': [
+        },
         {
-          text: 'AI Learning Notes',
+          text: '阶段输出',
           items: [
-            { text: 'AGENTS Overview', link: '/en/agents/' },
-            { text: 'LLM Foundation', link: '/en/agents/foundation/' },
-            { text: 'Prompt Engineering', link: '/en/agents/prompt-engineering/' }
-            // { text: 'Agent Development', link: '/en/agents/agent-development/' },
-            // { text: 'Multimodal Applications', link: '/en/agents/multimodal/' },
-            // { text: 'Project Practice', link: '/en/agents/projects/' },
-            // { text: 'Learning Resources', link: '/en/agents/resources/' }
+            { text: '已发表文章', link: '/zh/articles/' },
+            { text: '学习计划', link: '/zh/records/learning-plan-v3.0' },
+            { text: '学习进度总结', link: '/zh/records/2026-03-27' }
           ]
         }
       ]
