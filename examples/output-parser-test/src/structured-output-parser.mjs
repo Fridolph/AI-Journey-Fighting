@@ -14,18 +14,18 @@ const model = new ChatOpenAI({
 
 // 定义输出结构
 const parser = StructuredOutputParser.fromNamesAndDescriptions({
-    name: "姓名",
-    birth_year: "出生年份",
-    nationality: "国籍",
-    major_achievements: "主要成就，用逗号分隔的字符串",
-    famous_theory: "著名理论"
+    "name": "姓名",
+    "birth_year": "出生年份",
+    "nationality": "国籍",
+    "major_achievements": "主要成就，用逗号分隔的字符串",
+    "famous_theory": "著名理论"
 });
 
 const question = `请介绍一下爱因斯坦的信息。
 
 ${parser.getFormatInstructions()}`;
 
-console.log('question:', question)
+console.log('----------- question:', question)
 
 try {
     console.log("🤔 正在调用大模型（使用 StructuredOutputParser）...\n");

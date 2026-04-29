@@ -40,3 +40,44 @@ try {
 } catch (error) {
     console.error("❌ 错误:", error.message);
 }
+
+// > node src/json-output-parser.mjs
+
+// question: 请介绍一下爱因斯坦的信息。请以 JSON 格式返回，包含以下字段：name（姓名）、birth_year（出生年份）、nationality（国籍）、major_achievements（主要成就，数组）、famous_theory（著名理论）。
+
+
+// 🤔 正在调用大模型（使用 JsonOutputParser）...
+
+// 📤 模型原始响应:
+
+// {
+//   "name": "阿尔伯特·爱因斯坦",
+//   "birth_year": 1879,
+//   "nationality": "瑞士、美国、德国",
+//   "major_achievements": [
+//     "提出光量子假说并解释光电效应",
+//     "创立狭义相对论和广义相对论",
+//     "提出质能方程 E=mc²",
+//     "对量子力学和统计物理做出重要贡献"
+//   ],
+//   "famous_theory": "相对论"
+// }
+
+
+
+
+
+// ✅ JsonOutputParser 自动解析的结果:
+
+// {
+//   name: '阿尔伯特·爱因斯坦',
+//   birth_year: 1879,
+//   nationality: '瑞士、美国、德国',
+//   major_achievements: [
+//     '提出光量子假说并解释光电效应',
+//     '创立狭义相对论和广义相对论',
+//     '提出质能方程 E=mc²',
+//     '对量子力学和统计物理做出重要贡献'
+//   ],
+//   famous_theory: '相对论'
+// }

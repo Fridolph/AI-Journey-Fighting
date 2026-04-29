@@ -59,7 +59,7 @@ const progressItems = computed(() =>
   }))
 )
 
-const maintainLink = withBase('/zh/agents/concept-map/maintain')
+const maintainLink = withBase('/agents/concept-map/maintain')
 
 function selectNode(nodeId: string) {
   selectedNodeId.value = nodeId

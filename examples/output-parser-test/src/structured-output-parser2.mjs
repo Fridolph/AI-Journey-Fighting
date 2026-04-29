@@ -63,10 +63,10 @@ try {
 
     const result = await parser.parse(response.content);
 
-    console.log("✅ StructuredOutputParser 自动解析并验证的结果:\n");
-    console.log(JSON.stringify(result, null, 2));
+    // console.log("✅ StructuredOutputParser 自动解析并验证的结果:\n");
+    // console.log(JSON.stringify(result, null, 2));
 
-    console.log("📊 格式化展示:\n");
+    console.log("\n -------------------- 📊 格式化展示: -------------------- \n");
     console.log(`👤 姓名: ${result.name}`);
     console.log(`📅 出生年份: ${result.birth_year}`);
     if (result.death_year) {

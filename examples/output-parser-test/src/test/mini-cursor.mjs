@@ -6,13 +6,45 @@ import { JsonOutputToolsParser } from '@langchain/core/output_parsers/openai_too
 import { executeCommandTool, listDirectoryTool, readFileTool, writeFileTool } from './all-tools.mjs';
 import chalk from 'chalk';
 
+const providerBaseUrl = process.env.OPENAI_BASE_URL?.toLowerCase() ?? '';
+const modelName = process.env.MODEL_NAME?.toLowerCase() ?? '';
+const shouldDisableThinking =
+    providerBaseUrl.includes('deepseek.com') ||
+    modelName.includes('deepseek') ||
+    modelName.includes('reasoner') ||
+    modelName.includes('v4');
+
 const model = new ChatOpenAI({ 
-    modelName: "qwen-plus",
+    modelName: process.env.MODEL_NAME,
     apiKey: process.env.OPENAI_API_KEY,
     temperature: 0,
     configuration: {
         baseURL: process.env.OPENAI_BASE_URL,
     },
+    modelKwargs: shouldDisableThinking
+        ? {
+            // DeepSeek v4 系列默认会开启 thinking mode。
+            // 但 thinking mode + tool calls 有一个额外协议要求：
+            // 每一轮 assistant 返回里的 reasoning_content，
+            // 都必须在后续工具调用轮次中原样传回 API。
+            //
+            // 当前这个学习版 mini-cursor 是基于 LangChain 的消息对象在做循环，
+            // 它虽然能保留 content / tool_calls，
+            // 但不会自动把 DeepSeek 专有的 reasoning_content 完整透传回去。
+            //
+            // 所以继续保持默认 thinking mode，就会出现你这次的 400：
+            // "The reasoning_content in the thinking mode must be passed back to the API."
+            //
+            // 这里先采用最稳的修复：
+            // - 对 DeepSeek 兼容环境下的“多轮工具调用 Agent”场景，显式关闭 thinking mode
+            // - 保留 function calling / streaming / tool loop
+            //
+            // 这样这个 demo 的重点仍然是：
+            // “模型如何规划 -> 调工具 -> 继续推进任务”
+            // 而不是被 DeepSeek thinking mode 的兼容细节卡住。
+            thinking: { type: 'disabled' },
+        }
+        : undefined,
 });
 
 const tools = [
@@ -28,6 +60,14 @@ const modelWithTools = model.bindTools(tools);
 // Agent 执行函数
 async function runAgentWithTools(query, maxIterations = 30) {
     const history = new InMemoryChatMessageHistory();
+
+    console.log(chalk.gray(`model: ${process.env.MODEL_NAME || '(empty)'}`));
+    console.log(chalk.gray(`provider: ${process.env.OPENAI_BASE_URL || '(empty)'}`));
+    console.log(
+        chalk.gray(
+            `thinking mode: ${shouldDisableThinking ? 'disabled (for tool-call compatibility)' : 'default'}\n`,
+        ),
+    );
 
     await history.addMessage(new SystemMessage(`你是一个项目管理助手，使用工具完成任务。
 
@@ -176,4 +216,3 @@ try {
 } catch (error) {
     console.error(`\n❌ 错误: ${error.message}\n`);
 }
-

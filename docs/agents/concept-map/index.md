@@ -7,7 +7,7 @@ pageClass: ai-concept-map-page
 ---
 
 <script setup>
-import AiConceptMap from '../../../.vitepress/theme/components/AiConceptMap.vue'
+import AiConceptMap from '../../.vitepress/theme/components/AiConceptMap.vue'
 </script>
 
 <AiConceptMap />

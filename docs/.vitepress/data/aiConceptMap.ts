@@ -100,9 +100,9 @@ export const conceptNodes: ConceptNode[] = [
     y: 44,
     summary: 'AI 是整个学习地图的入口，用来回答“机器如何表现出智能”。',
     keyQuestion: '我能不能用一句话说清 AI、机器学习、深度学习的层级关系？',
-    examples: [sourceFile('概念文档源码', 'docs/zh/agents/foundation/01-what-is-ai.md')],
+    examples: [sourceFile('概念文档源码', 'docs/agents/foundation/01-what-is-ai.md')],
     experiments: ['用自己的话写一版“AI / ML / DL / LLM 区别”说明。'],
-    docs: [docLink('什么是 AI', '/zh/agents/foundation/01-what-is-ai')]
+    docs: [docLink('什么是 AI', '/agents/foundation/01-what-is-ai')]
   },
   {
     id: 'ml-dl',
@@ -115,13 +115,13 @@ export const conceptNodes: ConceptNode[] = [
     summary: '机器学习关注从数据中学习规律，深度学习通过多层神经网络学习更复杂的表示。',
     keyQuestion: '为什么深度学习不是另一种魔法，而是机器学习的一种方法？',
     examples: [
-      sourceFile('机器学习文档源码', 'docs/zh/agents/foundation/02-machine-learning.md'),
-      sourceFile('深度学习文档源码', 'docs/zh/agents/foundation/03-deep-learning.md')
+      sourceFile('机器学习文档源码', 'docs/agents/foundation/02-machine-learning.md'),
+      sourceFile('深度学习文档源码', 'docs/agents/foundation/03-deep-learning.md')
     ],
     experiments: ['把“规则判断”和“模型学习”各举一个生活例子。'],
     docs: [
-      docLink('机器学习', '/zh/agents/foundation/02-machine-learning'),
-      docLink('深度学习', '/zh/agents/foundation/03-deep-learning')
+      docLink('机器学习', '/agents/foundation/02-machine-learning'),
+      docLink('深度学习', '/agents/foundation/03-deep-learning')
     ]
   },
   {
@@ -135,15 +135,15 @@ export const conceptNodes: ConceptNode[] = [
     summary: '反向传播、损失函数、梯度下降、过拟合和正则化共同解释了模型如何被训练出来。',
     keyQuestion: '模型为什么会变好，又为什么可能只是在“背题”？',
     examples: [
-      sourceFile('反向传播文档源码', 'docs/zh/agents/foundation/05-backpropagation.md'),
-      sourceFile('损失函数文档源码', 'docs/zh/agents/foundation/20-loss-function.md'),
-      sourceFile('梯度下降文档源码', 'docs/zh/agents/foundation/21-gradient-descent.md')
+      sourceFile('反向传播文档源码', 'docs/agents/foundation/05-backpropagation.md'),
+      sourceFile('损失函数文档源码', 'docs/agents/foundation/20-loss-function.md'),
+      sourceFile('梯度下降文档源码', 'docs/agents/foundation/21-gradient-descent.md')
     ],
     experiments: ['用“考试刷题”类比解释过拟合和验证集。'],
     docs: [
-      docLink('反向传播', '/zh/agents/foundation/05-backpropagation'),
-      docLink('损失函数', '/zh/agents/foundation/20-loss-function'),
-      docLink('梯度下降', '/zh/agents/foundation/21-gradient-descent')
+      docLink('反向传播', '/agents/foundation/05-backpropagation'),
+      docLink('损失函数', '/agents/foundation/20-loss-function'),
+      docLink('梯度下降', '/agents/foundation/21-gradient-descent')
     ]
   },
   {
@@ -157,13 +157,13 @@ export const conceptNodes: ConceptNode[] = [
     summary: 'Transformer 用 Attention 建立 Token 之间的关系，是理解现代大模型的关键结构。',
     keyQuestion: 'Attention 到底在“看”什么？它为什么适合处理上下文？',
     examples: [
-      sourceFile('Transformer 文档源码', 'docs/zh/agents/foundation/11-transformer.md'),
-      sourceFile('Attention 文档源码', 'docs/zh/agents/foundation/15-attention.md')
+      sourceFile('Transformer 文档源码', 'docs/agents/foundation/11-transformer.md'),
+      sourceFile('Attention 文档源码', 'docs/agents/foundation/15-attention.md')
     ],
     experiments: ['拿一句话标出每个词最依赖的上下文词。'],
     docs: [
-      docLink('Transformer', '/zh/agents/foundation/11-transformer'),
-      docLink('Attention', '/zh/agents/foundation/15-attention')
+      docLink('Transformer', '/agents/foundation/11-transformer'),
+      docLink('Attention', '/agents/foundation/15-attention')
     ]
   },
   {
@@ -177,13 +177,13 @@ export const conceptNodes: ConceptNode[] = [
     summary: 'LLM 根据上下文预测下一个 Token，预训练、微调、采样共同影响它的输出方式。',
     keyQuestion: '为什么 LLM 是“预测下一个 Token”，却能表现得像在回答问题？',
     examples: [
-      sourceFile('LLM 文档源码', 'docs/zh/agents/foundation/10-llm.md'),
-      sourceFile('预训练与微调文档源码', 'docs/zh/agents/foundation/12-pretraining-finetuning.md')
+      sourceFile('LLM 文档源码', 'docs/agents/foundation/10-llm.md'),
+      sourceFile('预训练与微调文档源码', 'docs/agents/foundation/12-pretraining-finetuning.md')
     ],
     experiments: ['调高 temperature，观察同一个问题的回答稳定性变化。'],
     docs: [
-      docLink('大语言模型', '/zh/agents/foundation/10-llm'),
-      docLink('预训练与微调', '/zh/agents/foundation/12-pretraining-finetuning')
+      docLink('大语言模型', '/agents/foundation/10-llm'),
+      docLink('预训练与微调', '/agents/foundation/12-pretraining-finetuning')
     ]
   },
   {
@@ -198,7 +198,7 @@ export const conceptNodes: ConceptNode[] = [
     keyQuestion: '我是在“写提示词”，还是在设计模型完成任务的上下文？',
     examples: [sourceFile('Prompt 示例目录', 'examples/prompt-template-test/src')],
     experiments: ['删掉 system prompt 的限制，观察工具调用或回答风格怎么变化。'],
-    docs: [docLink('提示词工程', '/zh/agents/prompt-engineering/22-prompt-engineering')]
+    docs: [docLink('提示词工程', '/agents/prompt-engineering/22-prompt-engineering')]
   },
   {
     id: 'embedding',
@@ -215,7 +215,7 @@ export const conceptNodes: ConceptNode[] = [
       sourceFile('检索记忆示例', 'examples/memory-test/src/memory/retrieval-memory.pro.mjs')
     ],
     experiments: ['替换 Embedding 模型，比较相同查询召回内容是否变化。'],
-    docs: [docLink('Embedding', '/zh/agents/foundation/14-embedding')]
+    docs: [docLink('Embedding', '/agents/foundation/14-embedding')]
   },
   {
     id: 'vector-db',
@@ -249,7 +249,7 @@ export const conceptNodes: ConceptNode[] = [
       sourceFile('RAG Pipeline v4', 'examples/resume-memory-rag-qa/src/rag4/rag-pipeline-v4.mjs')
     ],
     experiments: ['打印 query、召回片段、最终 prompt，观察回答依赖哪一步。'],
-    docs: [docLink('RAG', '/zh/agents/foundation/19-rag')]
+    docs: [docLink('RAG', '/agents/foundation/19-rag')]
   },
   {
     id: 'tool-calling',
@@ -266,7 +266,7 @@ export const conceptNodes: ConceptNode[] = [
       sourceFile('mini-cursor 示例', 'examples/tool-test/src/mini-cursor.mjs')
     ],
     experiments: ['去掉 tool_call_id，观察多工具结果和模型消息如何失去对应关系。'],
-    docs: [docLink('Agent 开发', '/zh/agents/agent-development/')]
+    docs: [docLink('Agent 开发', '/agents/agent-development/')]
   },
   {
     id: 'agent-loop',
@@ -280,7 +280,7 @@ export const conceptNodes: ConceptNode[] = [
     keyQuestion: '循环退出条件是什么？如果没有限制会发生什么？',
     examples: [sourceFile('mini-cursor 源码', 'examples/tool-test/src/mini-cursor.mjs')],
     experiments: ['把 maxIterations 改成 2，观察任务在哪一轮被迫停止。'],
-    docs: [docLink('Agent 开发', '/zh/agents/agent-development/')]
+    docs: [docLink('Agent 开发', '/agents/agent-development/')]
   },
   {
     id: 'memory',

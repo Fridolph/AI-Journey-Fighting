@@ -1,6 +1,6 @@
 # AI 概念地图维护说明
 
-这份文档专门说明 `/zh/agents/concept-map/` 这一页是怎么组织的，以及后续要怎么做增删改查。
+这份文档专门说明 `/agents/concept-map/` 这一页是怎么组织的，以及后续要怎么做增删改查。
 
 仓库源码入口：
 [AI-Journey-Fighting](https://github.com/Fridolph/AI-Journey-Fighting)
@@ -78,7 +78,7 @@ y: 70
     '一个最小改动实验。'
   ],
   docs: [
-    docLink('站内文档', '/zh/agents/xxx/')
+    docLink('站内文档', '/agents/xxx/')
   ]
 }
 ```
@@ -172,7 +172,7 @@ y: 70
 
 ```ts
 docs: [
-  docLink('RAG 概念文档', '/zh/agents/foundation/19-rag')
+  docLink('RAG 概念文档', '/agents/foundation/19-rag')
 ]
 ```
 
@@ -198,7 +198,7 @@ docs: [
 4. 在 `conceptLinks` 补上和已有概念的关系
 5. 先检查站内是否已经有对应文档：
    有的话优先挂 `docLink()`；没有的话再挂 `sourceFile()`
-6. 打开 `/zh/agents/concept-map/` 肉眼检查布局
+6. 打开 `/agents/concept-map/` 肉眼检查布局
 
 ## 八、常见问题
 

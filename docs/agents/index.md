@@ -6,23 +6,23 @@
 
 ## 📑 目录导航
 
-### 1. [大模型基础](/zh/agents/foundation/)
+### 1. [大模型基础](/agents/foundation/)
 - 深度学习基础理论
 - Transformer架构详解
 - 大语言模型发展历程
 - 模型训练与微调技术
 
-### 2. [AI 概念地图](/zh/agents/concept-map/)
+### 2. [AI 概念地图](/agents/concept-map/)
 - 把已学概念、实战 demo、下一步学习目标连成关系图
 - 用“自测问题 + 最小改动实验”验证理解
 - 后续新增概念时只维护节点和关系数据
 
-### 3. [已发表文章](/zh/articles/)
+### 3. [已发表文章](/articles/)
 - 收录已公开发布的 AI 学习文章与阶段复盘
 - 保留原文章目录与资源文件，方便一一对应维护
 - 适合作为阶段输出与对外分享入口
 
-### 4. [提示词工程](/zh/agents/prompt-engineering/)
+### 4. [提示词工程](/agents/prompt-engineering/)
 - 基础提示词技巧
 - 思维链(Chain of Thought)
 - 少样本/零样本学习
