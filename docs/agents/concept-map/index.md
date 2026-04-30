@@ -11,7 +11,3 @@ import AiConceptMap from '../../.vitepress/theme/components/AiConceptMap.vue'
 </script>
 
 <AiConceptMap />
-
-## 维护入口
-
-- [概念地图维护说明](./maintain)

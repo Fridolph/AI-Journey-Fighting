@@ -96,10 +96,13 @@ const promptValue = await weeklyChatPipelinePrompt.formatPromptValue({
 });
 
 console.log('Pipeline + ChatPromptTemplate 生成的消息:');
-console.log(promptValue.toChatMessages());
 
-// const aiResponse = await model.invoke(messages);
+const messages = promptValue.toChatMessages()
+console.log(messages);
+console.log('-------------------------');
 
-// console.log('\nAI 生成的周报内容:');
-// console.log(aiResponse.content);
+const aiResponse = await model.invoke(messages);
+
+console.log('\n\n -------- AI 生成的周报内容:');
+console.log(aiResponse.content);
 

@@ -1,56 +1,197 @@
-# 🚀 AI-Journey-Fighting
+# AI-Journey-Fighting
 
-这是一个「AI 学习实战日志」项目：  
-从 AI 入门概念梳理，逐步走到 Agent 开发实战，并把过程沉淀为可复用文档。
+[![Deploy Docs to GitHub Pages](https://github.com/Fridolph/AI-Journey-Fighting/actions/workflows/deploy.yml/badge.svg)](https://github.com/Fridolph/AI-Journey-Fighting/actions/workflows/deploy.yml)
 
-## 🎯 我在做什么
+一个持续迭代的 AI 学习与实战仓库。
 
-- 先在 `docs/` 系统整理 AI 基础概念（从入门到理解大模型关键机制）。
-- 再进入 `examples/`，跟着博主文章逐个跑通 demo。
-- 每完成一次学习，就把“过程 + 理解 + 感悟”写进 `drafts/`。
-- 最后把成熟内容整理到 VitePress，形成可公开阅读的知识内容。
+这个项目不是“只放结论”的笔记仓库，而是把 AI 学习过程拆成三层来沉淀：
 
-> 当前学习顺序按个人进度推进，不强依赖博主项目原始顺序。
+- `examples/` 里跑 demo、做实验、踩坑排查
+- `drafts/` 里记录过程、理解、问题与复盘
+- `docs/` 里整理成可公开阅读的 VitePress 文档
 
-## 🗂️ 学习与沉淀流程
+目标很明确：从 AI 基础概念出发，逐步走到 RAG、Tool Calling、Memory、Agent Loop、Structured Output、LangGraph 等方向，并把“能跑通 + 能讲清楚 + 能复盘”沉淀成长期资产。
 
-1. 选择一个 `examples/<category>` 目录学习。
-2. 结合博主文章阅读并运行代码。
-3. 在 `drafts/<category>/` 创建或更新 Markdown 记录。
-4. 当该类别学习完成后，整理一篇阶段总结。
-5. 将可发布内容迁移到 `docs/`，用于 VitePress 展示。
+## 在线访问
 
-> 约定：`examples/` 下的原始教程示例默认保留不改；兼容修复、调试版本、学习注释版优先新建文件，与原文件形成对照。
+- 文档站：[AI Journey Fighting](https://fridolph.github.io/AI-Journey-Fighting/)
+- 仓库地址：[Fridolph/AI-Journey-Fighting](https://github.com/Fridolph/AI-Journey-Fighting)
 
-## 🚀 文档发布
+## 这个项目的特点
 
-- 文档站基于 VitePress，构建命令是 `npm run docs:build`
-- 每次推送到 `main`，都会自动触发 `.github/workflows/deploy.yml`
-- Workflow 会构建并上传 `docs/.vitepress/dist`，然后发布到当前仓库的 GitHub Pages
-- 仓库首次启用时，需要在 GitHub 仓库设置中将 Pages Source 设为 `GitHub Actions`
+### 1. 不是只整理知识，而是把学习过程公开化
 
-## 📁 目录结构（核心）
+这里不仅有概念文档，也保留了：
+
+- 实验代码
+- 学习草稿
+- 修复版 / 兼容版 / 对照版示例
+- 阶段性文章输出
+
+这样后续复盘时，能清楚知道：
+
+- 原始代码是什么
+- 为什么当前环境跑不通
+- 做了哪些修复
+- 自己真正学到了什么
+
+### 2. 用“代码 + 文档 + 概念地图”一起组织学习
+
+项目现在不是单一文档站，而是三条线并行：
+
+- `docs/agents/`：系统化概念与专题文档
+- `docs/articles/`：已发表文章归档
+- `docs/.vitepress/data/aiConceptMap.ts`：AI 学习概念地图的数据源
+
+概念地图会把基础概念、RAG、Agent、工程化能力连成一张持续生长的图，而不是散落成一堆孤立页面。
+
+### 3. 默认保留原始示例，对学习改动做对照沉淀
+
+针对 `examples/` 下的学习型示例，当前遵循的原则是：
+
+- 默认不直接改原始教程文件
+- 兼容修复、调试排查、学习注释优先新建文件
+- 差异说明优先写进 `drafts/`
+
+这让整个仓库更适合长期学习，而不是一次性跑完 demo 就丢掉。
+
+## 技术栈
+
+### 文档与站点
+
+- [VitePress](https://vitepress.dev/)：文档站生成
+- `markdown-it-mathjax3`：数学公式渲染
+- GitHub Pages：静态站点托管
+- GitHub Actions：自动构建与部署
+
+### 学习与实验方向
+
+当前仓库中的示例主要覆盖：
+
+- Prompt Engineering
+- RAG / Advanced RAG
+- Vector DB / Milvus
+- Memory / Retrieval Memory
+- Tool Calling / Agent Loop
+- Structured Output / Output Parser
+- LangGraph
+- 多模态、语音、TTS / STT
+- NestJS / React 等应用层实验
+
+## 当前学习进程
+
+### 已经完成并对外公开的部分
+
+- AI 基础概念文档已整理到 `docs/agents/foundation/`
+- Prompt Engineering、Agent Development 等专题目录已建立
+- 已发表文章已统一整理到 `docs/articles/`
+- AI 概念地图页与维护说明已经接入站点
+- GitHub Pages 自动部署已经打通
+
+### 当前重点推进中
+
+- `examples/output-parser-test/`
+  - Structured Output
+  - Output Parser
+  - mini-cursor / tool call 学习
+  - 兼容性修复与最小实验记录
+
+### 下一阶段方向
+
+- 继续补全 `Memory`、`LangGraph`、`Structured Output`、`Evaluation` 等站内文档
+- 让更多实验从 `drafts/` 进入 `docs/`
+- 完善概念地图，形成更清晰的学习路径与依赖关系
+
+## 项目结构
 
 ```text
-├── docs/           # 最终发布文档（VitePress）
-├── examples/       # 学习 demo 与实验代码
-├── drafts/         # 按 examples 分类沉淀学习草稿
-├── AGENTS.md       # 协作与学习流程规范
-└── .github/workflows/
-    └── deploy.yml  # 文档自动部署
+.
+├── docs/                    # 对外发布文档（VitePress）
+│   ├── agents/              # AI 概念与专题文档
+│   ├── articles/            # 已发表文章归档
+│   ├── records/             # 阶段性学习记录
+│   └── .vitepress/          # 站点配置、主题组件、概念地图数据
+├── drafts/                  # 学习过程草稿、踩坑记录、阶段总结
+├── examples/                # 学习 demo、实验代码、兼容修复版
+├── archive/                 # 暂不参与发布的历史资料
+├── AGENTS.md                # 协作与学习规范
+└── .github/workflows/       # GitHub Actions 工作流
 ```
 
-## 🌍 开源说明
+## 快速开始
 
-- 项目将持续开源迭代，记录真实学习路径与实践经验。
-- 欢迎关注、交流和提出建议，一起把 Agent 学习做成长期可积累的内容资产。
-- 文档后续以中文为主，不再强制维护双语同步。
-
-## 🛠️ 本地开发
+### 1. 安装依赖
 
 ```bash
 npm install
+```
+
+### 2. 本地启动文档站
+
+```bash
 npm run docs:dev
+```
+
+### 3. 本地构建
+
+```bash
 npm run docs:build
+```
+
+### 4. 本地预览构建结果
+
+```bash
 npm run docs:preview
 ```
+
+## 学习与沉淀方式
+
+每学习一个 `examples/<category>`，基本按这个流程走：
+
+1. 阅读对应 demo 与参考文章
+2. 本地跑通关键流程
+3. 在 `drafts/<category>/` 记录目标、步骤、问题与理解
+4. 形成阶段总结
+5. 将成熟内容整理进 `docs/`
+
+这个仓库更重视“学习链路完整”，而不是只保留最后答案。
+
+## 文档发布与 CI/CD
+
+当前文档发布已经自动化：
+
+- push 到 `main`
+- GitHub Actions 执行 `npm ci`
+- 执行 `npm run docs:build`
+- 发布 `docs/.vitepress/dist` 到 GitHub Pages
+
+工作流文件：
+
+- [`.github/workflows/deploy.yml`](./.github/workflows/deploy.yml)
+
+## Roadmap
+
+- [x] 切换为中文单语文档站
+- [x] 打通 GitHub Pages 自动部署
+- [x] 建立 AI 概念地图
+- [x] 整理已发表文章归档
+- [ ] 持续补全文档与实验的双向链接
+- [ ] 完善更多 Agent / RAG / Evaluation 学习专题
+- [ ] 逐步形成更稳定的学习方法论与项目模板
+
+## 适合谁
+
+如果你也在经历下面这些阶段，这个仓库会比较适合你：
+
+- 想系统学 AI，但不想只看碎片文章
+- 想从概念走到代码，而不是停留在术语层面
+- 想保留真实学习过程，而不是只看“成功版本”
+- 想把个人学习慢慢整理成可公开输出的内容
+
+## 开源说明
+
+- 当前文档以中文为主
+- 项目会持续迭代，不追求一步到位
+- 欢迎 Issue、讨论与交流
+
+如果你也在做类似的 AI 学习记录，欢迎一起交流，互相对照进步。

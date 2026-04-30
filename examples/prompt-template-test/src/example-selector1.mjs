@@ -90,17 +90,17 @@ const finalPrompt = await fewShotPrompt.format({
   current_requirement: currentRequirement,
 });
 
-// console.log(finalPrompt);
+console.log('------ finalPrompt -------- \n', finalPrompt);
 
-const finalPrompt2 = await fewShotPrompt.format({
-    current_requirement: '',
-});
+// const finalPrompt2 = await fewShotPrompt.format({
+//     current_requirement: '',
+// });
 
-console.log(finalPrompt2);
+// console.log(finalPrompt2);
 
-// const stream = await model.stream(finalPrompt);
-// console.log('\n=== AI 输出 ===');
-// for await (const chunk of stream) {
-//   process.stdout.write(chunk.content);
-// }
+// // const stream = await model.stream(finalPrompt);
+// // console.log('\n=== AI 输出 ===');
+// // for await (const chunk of stream) {
+// //   process.stdout.write(chunk.content);
+// // }
 

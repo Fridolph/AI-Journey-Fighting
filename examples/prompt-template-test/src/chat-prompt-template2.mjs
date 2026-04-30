@@ -67,8 +67,8 @@ const chatMessages = await composedTemplate.formatMessages({
 console.log('使用 SystemMessagePromptTemplate / HumanMessagePromptTemplate 生成的消息:');
 console.log(chatMessages);
 
-// const response = await model.invoke(chatMessages);
+const response = await model.invoke(chatMessages);
 
-// console.log('\nAI 生成的周报草稿:');
-// console.log(response.content);
+console.log('\n\n\n ----- AI 生成的周报草稿:');
+console.log(response.content);
 
