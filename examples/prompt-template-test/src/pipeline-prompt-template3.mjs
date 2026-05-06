@@ -95,11 +95,13 @@ const promptValue = await weeklyChatPipelinePrompt.formatPromptValue({
     '- 其他：完成与数据平台、运维平台两次联合评审会议',
 });
 
-console.log('Pipeline + ChatPromptTemplate 生成的消息:');
+console.log('-'.repeat(18))
+console.log('\nPipeline + ChatPromptTemplate 生成的消息:');
 
 const messages = promptValue.toChatMessages()
+console.log('-'.repeat(6) + ' 测试一下 ' + '-'.repeat(6));
 console.log(messages);
-console.log('-------------------------');
+console.log('-'.repeat(18));
 
 const aiResponse = await model.invoke(messages);
 

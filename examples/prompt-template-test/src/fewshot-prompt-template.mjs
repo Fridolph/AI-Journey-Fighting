@@ -59,5 +59,5 @@ const fewShotPrompt = new FewShotPromptTemplate({
 });
 
 const fewShotBlock = await fewShotPrompt.format({});
-console.log(fewShotBlock);
+console.log('-'.repeat(10) + '\n\n', fewShotBlock, '-'.repeat(10) + '\n\n');
 

@@ -28,6 +28,7 @@ const partialFormatted2 = await pipelineWithPartial.format({
         '- 小七：研发发布回滚一键脚本 PoC 版本',
 });
 
-console.log(partialFormatted);
+// console.log('\n================ 分割线：第一份周报模板 ================\n');
+// console.log(partialFormatted);
 console.log('\n================ 分割线：第二份周报模板 ================\n');
 console.log(partialFormatted2);

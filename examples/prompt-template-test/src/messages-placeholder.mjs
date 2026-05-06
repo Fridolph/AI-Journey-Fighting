@@ -63,8 +63,8 @@ const formattedMessages = await chatPromptWithHistory.formatPromptValue({
 console.log('包含历史对话的消息数组：');
 console.log(formattedMessages.toChatMessages());
 
-// const aiReply = await model.invoke(formattedMessages);
+const aiReply = await model.invoke(formattedMessages);
 
-// console.log('\nAI 回复内容：');
-// console.log(aiReply.content);
+console.log('\nAI 回复内容：');
+console.log(aiReply.content);
 

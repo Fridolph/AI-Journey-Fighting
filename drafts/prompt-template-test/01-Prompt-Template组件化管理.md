@@ -649,6 +649,75 @@ const stream = await model.stream(messages);
 
 ---
 
+## 兼容性踩坑：DeepSeek 不支持 Embeddings
+
+**现象：** 运行 `example-selector2.mjs` 报 `MODEL_NOT_FOUND` 404 错误。
+
+**原因：** 项目 `OPENAI_BASE_URL` 指向 `https://api.deepseek.com`，但 **DeepSeek 官方 API 目前不提供 embeddings 端点**。而 `SemanticSimilarityExampleSelector` 需要调用 embedding 模型做向量化。
+
+**解决：** Chat 模型和 Embedding 模型分离配置：
+
+| 配置项 | 用途 | 值 |
+|--------|------|----|
+| `OPENAI_BASE_URL` | Chat 模型 | `https://api.deepseek.com` |
+| `EMBEDDINGS_URL` | Embedding 模型 | `https://dashscope.aliyuncs.com/compatible-mode/v1`（千问） |
+| `EMBEDDINGS_API_KEY` | Embedding API Key | 千问的 key |
+
+修复版文件：
+- `weekly-report-examples-writer-milvus-fix.mjs` — 写入 Milvus 时用千问 embedding
+- `example-selector2-fix.mjs` — 语义选择时用千问 embedding
+
+运行方式：
+```bash
+# 先写入示例数据到 Milvus（需 Milvus 已启动）
+node src/weekly-report-examples-writer-milvus-fix.mjs
+
+# 再跑语义选择
+node src/example-selector2-fix.mjs
+```
+
+**注意：** embedding 模型一旦更换，Milvus 中的向量维度/语义空间就不匹配了，需要**全量删除并重建向量库**。
+
+---
+
+## 兼容性踩坑：原生 SDK 写入 vs LangChain 读取出 schema 不兼容
+
+**现象：** `example-selector2-fix.mjs` 检索结果中 `doc.pageContent` 为空，FewShot 拿不到 `report_snippet` 内容。导致 AI 自己编造数据（如「4 个子模块、30 条单测」），而非参考 Milvus 中已存入的真实示例。
+
+**原因：**
+
+| 层面 | 写入方式 | 使用的字段 | 读取方式 | 期望字段 |
+|------|---------|-----------|---------|---------|
+| 原版 | 原生 Milvus SDK `client.insert()` | 自定义 `scenario` / `report_snippet` / `vector` | LangChain `similaritySearch()` | `langchain_text`（textField） |
+
+原版 `weekly-report-examples-writer-milvus.mjs` 用原生 SDK 自定义 schema 写数据，文本存在 `report_snippet` 字段。但 LangChain 的 `Milvus.fromExistingCollection()` 读取时，默认 `textField: 'langchain_text'`，读不到自定义字段的内容。
+
+**解决：** 用 LangChain 的 `Milvus.fromDocuments()` 写入，让 schema 与 LangChain 读取层保持一致：
+
+```
+写入：pageContent → embedding（vector 字段）+ langchain_text（原文）
+      metadata  → JSON 序列化到 metadata 字段
+读取：doc.pageContent = 原文
+      doc.metadata.scenario / doc.metadata.report_snippet = 自定义数据
+```
+
+修复版文件：
+- `weekly-report-examples-writer-milvus-fix-v2.mjs` — 用 LangChain `fromDocuments()` 建集合并写入
+- `example-selector2-check.mjs` — 验证检索结果脚本，可查看 Milvus 全量数据 + 语义检索 TOP 结果
+
+**验证结果（修复后）：**
+```
+场景：技术债清理
+检索 TOP 2：
+  第 1 名 → weekly_5（技术债清理为主）✓ report_snippet 正常
+  第 2 名 → weekly_6（老系统拆分）    ✓ report_snippet 正常
+匹配准确，示例内容完整可读
+```
+
+**关键教训：** 当写入端和读取端分别使用不同封装层（原生 SDK vs LangChain）时，需要确保字段名和 schema 约定一致。最简单的方式是**全程用同一层封装读写**。
+
+---
+
 ## 开发注意事项
 
 1. **`inputVariables` 自动识别**：大多数情况下不需要手动声明，LangChain 会自动从模版字符串中提取 `{占位符}`。
