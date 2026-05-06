@@ -14,12 +14,13 @@
 | 06 | [博物馆国宝/文物解读图鉴](./infographics/museum-artifact) | 信息图 | 文物知识海报，联网检索+几何嵌入+笔刷动线 | 单版本 | — |
 | 07 | [科学百科信息图](./infographics/science-encyclopedia) | 信息图 | 经典百科全书风格，支持人/动物/植物三模版 | 单版本 | — |
 | 08 | [景点建筑信息图](./infographics/landmark-architecture) | 信息图 | 真实照片+技术蓝图叠加，尺寸标注 | 单版本 | — |
-| 09 | [掌纹算命](./portrait-analysis/palm-reading) | 人像诊断 | 基于掌纹的玄学/中医命运分析报告 | 单版本 | — |
-| 10 | [面相痣相算命](./portrait-analysis/face-reading) | 人像诊断 | 综合多套面相学/命理学体系的面相分析 | 单版本 | — |
-| 11 | [发型专属优化报告](./portrait-analysis/hair-optimization) | 人像诊断 | 10+发型方案推荐+综合分析+维护建议 | 单版本 | — |
-| 12 | [真实旁观抓拍](./documentary-sim/bystander-snapshot) | 纪实模拟 | 第三视角自然抓拍，主体清晰+旁观感 | 单版本 | — |
-| 13 | [伪纪录片老照片](./documentary-sim/mockumentary-photo) | 纪实模拟 | 粗粝真实的现场感纪实图像，真实感>美感 | 单版本 | — |
-| 14 | [报纸头条假新闻](./documentary-sim/fake-news-headline) | 纪实模拟 | 复古报纸头版+折痕质感+新闻摄影 | 单版本 | — |
+| 09 | [易经卦象与爻辞知识图鉴](./infographics/i-ching-hexagram) | 信息图 | 卦象整体图+单爻图，东方哲学知识海报 | 双版本 | — |
+| 10 | [掌纹算命](./portrait-analysis/palm-reading) | 人像诊断 | 基于掌纹的玄学/中医命运分析报告 | 单版本 | — |
+| 11 | [面相痣相算命](./portrait-analysis/face-reading) | 人像诊断 | 综合多套面相学/命理学体系的面相分析 | 单版本 | — |
+| 12 | [发型专属优化报告](./portrait-analysis/hair-optimization) | 人像诊断 | 10+发型方案推荐+综合分析+维护建议 | 单版本 | — |
+| 13 | [真实旁观抓拍](./documentary-sim/bystander-snapshot) | 纪实模拟 | 第三视角自然抓拍，主体清晰+旁观感 | 单版本 | — |
+| 14 | [伪纪录片老照片](./documentary-sim/mockumentary-photo) | 纪实模拟 | 粗粝真实的现场感纪实图像，真实感>美感 | 单版本 | — |
+| 15 | [报纸头条假新闻](./documentary-sim/fake-news-headline) | 纪实模拟 | 复古报纸头版+折痕质感+新闻摄影 | 单版本 | — |
 
 ## 按分类浏览
 
@@ -42,6 +43,7 @@
 | [博物馆国宝/文物解读图鉴](./infographics/museum-artifact) | 文物检索+知识+设计 | 文物名称 | 展览级文物知识海报 |
 | [科学百科信息图](./infographics/science-encyclopedia) | 百科知识 → 结构化图解 | 人/动物/植物名 | 百科风格信息图 |
 | [景点建筑信息图](./infographics/landmark-architecture) | 建筑照片+蓝图标注 | 建筑/景点名 | 技术蓝图叠加图 |
+| [易经卦象与爻辞知识图鉴](./infographics/i-ching-hexagram) | 卦象/爻辞 → 东方哲学知识海报 | 卦名+经文 | 双版本知识图鉴 |
 
 ### 人像诊断
 基于人像照片进行分析、算命或专业诊断。核心特征：高情商表达 → 多维度分析 → 报告级排版 → 真实可信。
@@ -73,3 +75,4 @@
 | 日期 | 变更 |
 |------|------|
 | 2026-04-30 | 初始整理：14个提示词，4大分类，接入 VitePress |
+| 2026-05-01 | 新增：易经卦象与爻辞知识图鉴（双版本），从博物馆文物模板移植改造 |
