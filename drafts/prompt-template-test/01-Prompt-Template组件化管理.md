@@ -729,26 +729,51 @@ node src/example-selector2-fix.mjs
 
 ---
 
-## 心得与下一步
+## 场景速查：什么场景用什么 API
 
-**核心收获：**
-- Prompt 管理从「拼字符串」升级为「组件化组合」——这个思想类比前端组件化，能大大降低维护成本
-- `PipelinePromptTemplate` 是最核心的组合工具，子模块的可复用性是关键价值
-- 大部分实际场景用 `ChatPromptTemplate`（messages 数组），配合 `MessagesPlaceholder` 处理多轮对话
-- `ExampleSelector` 解决了 few-shot 的动态选择问题，数据量大的时候很有用
+不用死记，用时回来查这张表即可：
 
-**工程化视角理解：**
-- 传统使用 AI 是在聊天窗口里直接打字提问，每次都需要重复输入相同的前置信息
-- Prompt Template 体系将问题「封装」——通过不同参数、类型、细节，实现快速的 prompt 切换、组合和问答
-- 这样更工程化：不用重复输入同样的文字，且可以像代码一样版本管理、复用、测试
+| 场景 | 用什么 API | 一句话 |
+|------|-----------|--------|
+| 简单 prompt，几个变量填充 | `PromptTemplate` | `fromTemplate('{name}') + format({name})` |
+| 需要 system/human/ai 角色分离 | `ChatPromptTemplate` | `fromMessages([['system','...'],['human','...']])` |
+| prompt 很大，想拆成「人设/背景/任务/格式」等模块 | `PipelinePromptTemplate` | 先拆零件，再拼装，零件可跨文件复用 |
+| 某些变量全局固定（公司名、语气） | `.partial()` | 焊死固定变量，减少后续参数 |
+| 需要插入多轮对话历史 | `MessagesPlaceholder` | 占位符不是字符串，是消息数组 |
+| 给 AI 看几个范例再提问 | `FewShotPromptTemplate` | examples + examplePrompt + prefix/suffix |
+| 范例是 human-ai 对话格式 | `FewShotChatMessagePromptTemplate` | 同上，但 examplePrompt 是 ChatPromptTemplate |
+| 范例太多，按 token 限制筛 | `LengthBasedExampleSelector` | 按数组顺序塞，塞到 maxLength 为止 |
+| 范例太多，要选和当前场景相关的 | `SemanticSimilarityExampleSelector` | 向量语义匹配 + Milvus 存示例 |
 
-**与 Skill 的关系：**
-- 现代 AI 工具的 Skill / Agent / Tool，本质上就是：**预定义的 Prompt 模板 + 变量槽 + 可能的工具调用**
-- 本项目当前学习路径：`PromptTemplate → Pipeline → ChatPromptTemplate → MessagesPlaceholder → FewShot`，正是在构建这个能力的地基
-- 后续学到 Tool Calling 时，prompt 里会多出一个 `{tools}` 块（函数定义）；学到 Agent Loop 时，`MessagesPlaceholder('history')` 里会塞入 `ToolMessage` 作为中间步骤结果
-- **所有这些高级特性都基于这节学的模板体系**
+## 调用方式速查
 
-**下一步方向：**
-- 同一个 `PipelinePromptTemplate` 能否根据不同的 tool 调用结果动态替换某个子 prompt？
-- ChatPromptTemplate 的 `fromMessages` 能否包含条件逻辑（如根据用户意图选不同的 system prompt）？
-- FewShot 示例的向量库是否可以和其他 RAG 知识库共用同一个 Milvus 实例？
+| finalPrompt 类型 | 调用方法 | 返回值 |
+|-----------------|---------|--------|
+| `PromptTemplate` | `pipeline.format({...})` | 纯文本字符串 |
+| `ChatPromptTemplate` | `pipeline.formatPromptValue({...})` | ChatPromptValue → `.toChatMessages()` 得消息数组 |
+
+## 文件依赖关系图
+
+```
+pipeline-prompt-template.mjs （核心文件，export 公用零件）
+  ├── personaPrompt ─────────────→ pipeline-prompt-template2.mjs
+  ├── contextPrompt ─────────────→ pipeline-prompt-template2.mjs
+  ├── personaPrompt + contextPrompt → pipeline-prompt-template3.mjs
+  └── pipelinePrompt ────────────→ partial.mjs
+
+example-selector2-fix.mjs ←── 依赖 Milvus + 千问 embedding
+  ↑
+weekly-report-examples-writer-milvus-fix-v2.mjs （先跑写入，再跑选择）
+```
+
+## 本章学习感悟
+
+- 不需要记住所有 API，重点区分 **「什么场景用什么」**，用到时回来查上表
+- `PipelinePromptTemplate` + `ChatPromptTemplate` 是生产环境最常用的组合
+- `MessagesPlaceholder` 是建设 Agent 记忆/历史能力的关键入口
+- `ExampleSelector` 解决 few-shot 动态选例，LengthBased 和 Semantic 各有适用场景
+- 两个踩坑牢记：① DeepSeek 不支持 embedding → Chat/Embedding 服务要分离配置 ② 写入/读出用不同封装层 → schema 不兼容
+
+## 下一步方向
+
+贴回博客原文的后续章节，按学习节奏进入下一个主题。

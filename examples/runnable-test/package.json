@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node ./src/runnable.mjs",
+    "fri": "node ./src/practice/step3.mjs"
   },
   "keywords": [],
   "author": "",

@@ -32,6 +32,7 @@ const input = {
 
 // 步骤 1: 格式化 prompt
 const formattedPrompt = await promptTemplate.format(input);
+console.log('formattedPrompt\n', formattedPrompt)
 // 步骤 2: 调用模型
 const response = await model.invoke(formattedPrompt);
 // 步骤 3: 解析输出
