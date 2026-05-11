@@ -5,7 +5,7 @@ import { MilvusClient, MetricType } from "@zilliz/milvus2-sdk-node";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 
-const COLLECTION_NAME = "ebook_collection";
+const COLLECTION_NAME = "ebook_jinyong_tianlongbabu";
 const VECTOR_DIM = 1024;
 
 // 初始化 OpenAI Chat 模型
@@ -23,7 +23,7 @@ const embeddings = new OpenAIEmbeddings({
   apiKey: process.env.OPENAI_API_KEY,
   model: process.env.EMBEDDINGS_MODEL_NAME,
   configuration: {
-    baseURL: process.env.OPENAI_BASE_URL,
+    baseURL: process.env.EMBEDDINGS_URL,
   },
   dimensions: VECTOR_DIM,
 });
@@ -39,26 +39,27 @@ const milvusSearch = new RunnableLambda({
     const { question, k = 5 } = input;
 
     try {
-      // 1. 生成问题向量
+      // 步骤1：把问题文本转成向量
       const queryVector = await embeddings.embedQuery(question);
 
-      // 2. 调用 Milvus 搜索
+      // 步骤2：用向量在 Milvus 里做相似度搜索
       const searchResult = await milvusClient.search({
         collection_name: COLLECTION_NAME,
         vector: queryVector,
-        limit: k,
-        metric_type: MetricType.COSINE,
+        limit: k, // 返回最相似的 k 条
+        metric_type: MetricType.COSINE, // 用余弦相似度计算
         output_fields: ["id", "book_id", "chapter_num", "index", "content"],
       });
 
       const results = searchResult.results ?? [];
+      // 步骤3：格式化结果
       const retrievedContent = results.map((item, idx) => ({
         id: item.id,
         book_id: item.book_id,
         chapter_num: item.chapter_num,
         index: item.index ?? idx,
         content: item.content,
-        score: item.score,
+        score: item.score, // 相似度分数，越接近1越相关
       }));
 
       return { question, retrievedContent };
@@ -93,6 +94,7 @@ const buildPromptInput = new RunnableLambda({
   func: async (input) => {
     const { question, retrievedContent } = input;
 
+    // 兜底：没有检索到内容的返回
     if (!retrievedContent.length) {
       return {
         hasContext: false,
@@ -120,14 +122,15 @@ const buildPromptInput = new RunnableLambda({
         }`
       );
     });
-
+    // 把所有片段拼成一个 context 字符串
     const context = retrievedContent
       .map((item, i) => {
         return `[片段 ${i + 1}]
 章节: 第 ${item.chapter_num} 章
 内容: ${item.content}`;
       })
-      .join("\n\n━━━━━\n\n");
+      .join("\n\n━━━━━\n\n"); 
+      // 用分隔符隔开每个片段
 
     return {
       hasContext: true,

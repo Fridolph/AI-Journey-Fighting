@@ -11,6 +11,14 @@ const mockUsers = new Map([
       email: "guang@example.com",
     },
   ],
+  [
+    'fri',
+    {
+      id: 'fri',
+      name: '笙箫',
+      email: 'xiao@exam.cn'
+    }
+  ]
 ]);
 
 // 节点1：根据 config.configurable.userId 查用户

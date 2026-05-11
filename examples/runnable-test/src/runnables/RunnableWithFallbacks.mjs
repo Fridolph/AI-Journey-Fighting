@@ -6,14 +6,15 @@ import { RunnableLambda } from "@langchain/core/runnables";
 const premiumTranslator = RunnableLambda.from(async (text) => {
   console.log("[Premium] 尝试翻译...");
   // 模拟高级服务不可用
+  // return 'hello 1'
   throw new Error("Premium 服务超时");
 });
 
 const standardTranslator = RunnableLambda.from(async (text) => {
   console.log("[Standard] 尝试翻译...");
   // 模拟标准服务也挂了
-  return "xxx";
-  // throw new Error("Standard 服务限流");
+  // return "AAA";
+  throw new Error("Standard 服务限流");
 });
 
 const localTranslator = RunnableLambda.from(async (text) => {

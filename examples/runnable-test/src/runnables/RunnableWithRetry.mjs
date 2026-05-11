@@ -9,7 +9,7 @@ const unstableRunnable = RunnableLambda.from(async (input) => {
   console.log(`第 ${attempt} 次尝试，输入: ${input}`);
 
   // 模拟 70% 概率失败的情况
-  if (Math.random() < 0.7) {
+  if (Math.random() < 0.9) {
     console.log("本次尝试失败，抛出错误。");
     throw new Error("模拟的随机错误");
   }

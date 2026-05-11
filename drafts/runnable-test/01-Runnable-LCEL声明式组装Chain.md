@@ -338,3 +338,53 @@ Runnable API 很多，但日常最常用的就是四个模式：
 ## 下一步方向
 
 进入下一章：LCEL 实战练习，用 chain 方式重构更多实际场景。
+
+---
+
+## 章末总结：Runnable / LCEL 全回顾
+
+### 学完这章，你掌握了什么
+
+| 层次 | 内容 | 在哪练的 |
+|------|------|---------|
+| 核心 API | `RunnableSequence`、`RunnableMap`、`RunnableBranch`、`RunnableLambda` | fri/ + practice/step1~8 |
+| 补充 API | `RouterRunnable`、`RunnablePassthrough`、`RunnablePick`、`RunnableEach` | fri/ + 文章原文 |
+| 增强 API | `withRetry`、`withFallbacks`、`withConfig`、`withCallbacks` | step7 + 原文 runnables/ |
+| 记忆 | `MessagesPlaceholder` + `RunnableWithMessageHistory` + 手动 runWithMemory | step3~4, step8 |
+| 实战案例 | MCP Agent Loop、RAG 电子书助手 | cases/mcp-test-fix.mjs, cases/ebook-reader-rag-fix.mjs |
+| 心智模型 | `Answer = chain(input)`，Prompt → Model → Parser | MENTAL-MODEL.mjs, AI-me.md |
+
+### 关键踩坑记录
+
+| 坑 | 现象 | 解决 |
+|----|------|------|
+| `RunnableSequence.from()` 加 `await` | 不影响运行但多余 | `from()` 是同步的 |
+| PromptTemplate 占位符和 invoke key 不匹配 | `Missing value for input` | 模板 `{xxx}` ↔ invoke `{ xxx }` 必须一致 |
+| Pipeline finalPrompt 被注释 | `Cannot read properties of undefined` | 检查 `finalPrompt` 是否定义 |
+| `RunnableBranch` handler 放字符串 | `Expected a Runnable` | 用 `RunnableLambda.from()` 包 |
+| `RunnableMap.from()` 参数是对象不是数组 | 语法错误 | `{ key: chain }` 不是 `[chain1, chain2]` |
+| `RunnableWithMessageHistory` 废弃 | deprecated 警告 | 改用手动 `runWithMemory(sessionId, messages[])` |
+| DeepSeek thinking mode Agent Loop | 400 `reasoning_content must be passed back` | 改用 `deepseek-chat`（非 thinking 模型） |
+| DeepSeek 不支持 embeddings | `MODEL_NOT_FOUND` 404 | Chat 和 Embedding 分离配置，Embedding 用千问 |
+| `dotenv/config` 找错 .env 路径 | 环境变量全 undefined | 统一用 `npm run` 或显式 `dotenv.config({ path })` |
+
+### LCEL 开发心法
+
+```
+① 分析流程，拆成原子步骤
+② 根据步骤关系选 Runnable：
+    顺序 → RunnableSequence / .pipe()
+    并行 → RunnableMap
+    分支 → RunnableBranch / RouterRunnable
+    自定义 → RunnableLambda
+③ 统一调用：invoke / stream / batch
+④ 按需增强：
+    需要重试 → .withRetry({ stopAfterAttempt })
+    需要降级 → .withFallbacks({ fallbacks: [...] })
+    需要传参 → .withConfig({ configurable: {...} })
+    需要观测 → invoke(input, { callbacks: [...] })
+
+万能起手式：
+    PromptTemplate → ChatOpenAI → StringOutputParser
+    chain.invoke({ question: '...' })
+```

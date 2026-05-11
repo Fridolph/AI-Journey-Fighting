@@ -7,7 +7,7 @@ import { ChatPromptTemplate, MessagesPlaceholder } from '@langchain/core/prompts
 import { RunnableSequence, RunnableLambda, RunnableBranch, RunnablePassthrough } from '@langchain/core/runnables';
 
 const model = new ChatOpenAI({ 
-    modelName: "qwen-plus",
+    modelName: process.env.MODEL_NAME,
     apiKey: process.env.OPENAI_API_KEY,
     configuration: {
         baseURL: process.env.OPENAI_BASE_URL,
@@ -28,12 +28,15 @@ const mcpClient = new MultiServerMCPClient({
         },
     }
 });
-
+// 从所有 MCP Server 拉取可用工具列表
 const tools = await mcpClient.getTools();
+// 把工具描述注入到 LLM，让它知道"我能调用哪些工具"
 const modelWithTools = model.bindTools(tools);
 
 const prompt = ChatPromptTemplate.fromMessages([
     ["system", "你是一个可以调用 MCP 工具的智能助手。"],
+    // 关键: 每轮循环都把完整的对话历史（包括上一轮的 ToolMessage）
+    // 传进去，LLM 才能"记住"上下文
     new MessagesPlaceholder("messages"),
 ]);
 
@@ -46,16 +49,18 @@ const toolExecutor = new RunnableLambda({
         const toolResults = [];
 
         for (const toolCall of response.tool_calls ?? []) {
+            // 1. 从工具列表里找到对应工具
             const foundTool = tools.find(t => t.name === toolCall.name);
             if (!foundTool) continue;
-
+            // 2. 执行工具，传入 LLM 决定的参数
             const toolResult = await foundTool.invoke(toolCall.args);
 
-            // 兼容不同返回格式的字符串化
+            // 3. 统一格式化为字符串
             const contentStr = typeof toolResult === 'string'
                 ? toolResult
                 : (toolResult?.text || JSON.stringify(toolResult));
 
+            // 4. 包装成 ToolMessage（LangChain 标准格式
             toolResults.push(new ToolMessage({
                 content: contentStr,
                 tool_call_id: toolCall.id,
@@ -66,9 +71,10 @@ const toolExecutor = new RunnableLambda({
     }
 });
 
-// 2. 对结果的处理
+// 2. 对结果的处理 - 单轮 Agent 步骤
 const agentStepChain = RunnableSequence.from([
     // step1: 将 LLM 输出挂到 state.response 上
+    // 该方法用途：保留原有字段，追加新字段，不破坏 state 结构。
     RunnablePassthrough.assign({
         response: llmChain,
     }),
@@ -82,6 +88,7 @@ const agentStepChain = RunnableSequence.from([
             new RunnableLambda({
                 func: async (state) => {
                     const { messages, response } = state;
+                    // 把 AI 回复写入历史信息
                     const newMessages = [...messages, response];
                     return {
                         ...state,
@@ -114,6 +121,7 @@ const agentStepChain = RunnableSequence.from([
 
                     return {
                         ...state,
+                        // AIMessage 先写入历史
                         messages: newMessages,
                     };
                 },
@@ -129,6 +137,7 @@ const agentStepChain = RunnableSequence.from([
                         ...state,
                         messages: [...messages, ...(toolMessages ?? [])],
                         done: false,
+                        // 这里为 false 所以会继续循环
                     };
                 },
             }),
@@ -154,11 +163,13 @@ async function runAgentWithTools(query, maxIterations = 30) {
             console.log(`\n✨ AI 最终回复:\n${state.final}\n`);
             return state.final;
         }
+        // 否则继续循环，messages 里已经包含了工具结果
+        // LLM 下一轮会看到完整历史，决定继续调工具还是直接回答
     }
-
+    // 超出最大轮次，返回最后一条消息
     return state.messages[state.messages.length - 1].content;
 }
 
-await runAgentWithTools("北京南站附近的酒店，最近的 3 个酒店，拿到酒店图片，打开浏览器，展示每个酒店的图片，每个 tab 一个 url 展示，并且在把那个页面标题改为酒店名");
+await runAgentWithTools("成都天府五街附近的酒店，最近的 3 个酒店，拿到酒店图片，打开浏览器，展示每个酒店的图片，每个 tab 一个 url 展示，并且在把那个页面标题改为酒店名");
 
 // await mcpClient.close();
