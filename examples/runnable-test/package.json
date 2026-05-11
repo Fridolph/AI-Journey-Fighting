@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "node ./src/runnable.mjs",
-    "fri": "node ./src/practice/step3.mjs"
+    "fri": "node ./src/practice/step8.mjs"
   },
   "keywords": [],
   "author": "",
