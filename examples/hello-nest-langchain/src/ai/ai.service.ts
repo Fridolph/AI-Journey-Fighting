@@ -10,11 +10,9 @@ export class AiService {
 
   constructor(
     // @Inject(ConfigService) configService: ConfigService,
-    @Inject('CHAT_MODEL') model: ChatOpenAI
+    @Inject('CHAT_MODEL') model: ChatOpenAI,
   ) {
-    const prompt = PromptTemplate.fromTemplate(
-      '请回答以下问题：\n\n{query}',
-    );
+    const prompt = PromptTemplate.fromTemplate('请回答以下问题：\n\n{query}');
     // const model = new ChatOpenAI({
     //   temperature: 0.7,
     //   model: configService.get('MODEL_NAME'),
@@ -26,14 +24,28 @@ export class AiService {
     this.chain = prompt.pipe(model).pipe(new StringOutputParser());
   }
 
-  async runChain(query: string): Promise<string> {
+  async runChain(query: string): Promise<any> {
     return this.chain.invoke({ query });
   }
 
-  async *streamChain(query: string): AsyncGenerator<string> {
+  // ai.service.ts
+  async runChainStream(
+    query: string,
+    onChunk: (chunk: string) => void,
+  ): Promise<void> {
     const stream = await this.chain.stream({ query });
+
     for await (const chunk of stream) {
-      yield chunk;
+      // chunk 可能是字符串，也可能是对象
+      const text =
+        typeof chunk === 'string'
+          ? chunk
+          : (chunk?.content ?? chunk?.text ?? '');
+
+      if (text) {
+        // ✅ 过滤空值
+        onChunk(text);
+      }
     }
   }
 }
