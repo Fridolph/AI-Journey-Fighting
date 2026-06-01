@@ -122,17 +122,101 @@ async *runChainStream(query: string): AsyncIterable<string> {
 | `time_now` | 获取当前时间 | `new Date().toISOString()` |
 | `cron_job` | 定时任务管理 | `@nestjs/schedule` SchedulerRegistry |
 
-### 5. 定时任务 Cron Job 的设计
-
-这是本章核心——通过 Tool 接口让 AI 能创建/管理定时任务：
+### 5. 定时任务 Cron Job 的设计 — 任务调度架构
 
 ```
-用户："1分钟后提醒我喝水"
-  → LLM 返回 tool_call: cron_job.add({ type: "at", at: "2025-...", instruction: "提醒我喝水" })
-  → AiService 执行 cronJobTool.invoke(args)
-  → CronJobToolService 创建 CronJob + 写入数据库
-  → 到期后 SchedulerRegistry 触发 JobService.execute()
-  → 启动新的 Agent Loop，用 instruction 作为 prompt 执行
+用户说 "1分钟后提醒我喝水"
+  │
+  ▼
+AiService.runChain(query)
+  → Agent Loop → LLM 决定调 cron_job.add({ type: "at", at: "...", instruction: "提醒我喝水" })
+  → cronJobTool.invoke(args)
+  → CronJobToolService → JobService.addJob(...)
+  │
+  ├── 存入 MySQL（Job 表：id/instruction/type/cron/everyMs/at/isEnabled）
+  └── startRuntime(job)
+        │
+        ▼
+      setTimeout(delay, () => {          // at 类型
+        // 或 new CronJob(expr, () => {})  // cron 类型
+        // 或 setInterval(ms, () => {})     // every 类型
+        JobAgentService.runJob("提醒我喝水")  ← 另起一个 Agent Loop
+          → bindTools([send_mail, web_search, db_users_crud, time_now])
+          → （没有 cron_job！防止嵌套创建定时任务）
+          → 执行完 → 结果记日志
+      })
+```
+
+### 两个独立的 Agent Loop
+
+| | AiService.runChain | JobAgentService.runJob |
+|--|-------------------|----------------------|
+| 触发 | HTTP 请求 | 定时器到期 |
+| 绑定工具 | 6 个（含 cron_job） | 4 个（不含 cron_job） |
+| 目的 | 响应用户交互 | 执行后台任务 |
+| 结果 | SSE 流式返回 | 写入日志 |
+
+### 启动恢复
+
+`onApplicationBootstrap()` 从 MySQL 读取 `isEnabled=true` 的 Job，重新注册到 SchedulerRegistry——服务重启不丢定时任务。
+
+### 三种调度方式
+
+| 类型 | 实现 | 场景 |
+|------|------|------|
+| `cron` | `new CronJob(expr, fn)` | 复杂周期（每周一 9:00） |
+| `every` | `setInterval(fn, ms)` | 固定间隔（每 5 分钟） |
+| `at` | `setTimeout(fn, delay)` | 一次性定时（1 分钟后） |
+
+## Tool 内部结构深度解析
+
+### `tool(fn, config)` 签名
+
+```ts
+tool(
+  async ({ action, id, name, email }) => { /* 回调 */ },  // 参数1：业务逻辑
+  {                                                         // 参数2：配置
+    name: 'db_users_crud',           // LLM 看到的工具名
+    description: '增删改查用户...',  // LLM 据此判断何时调用
+    schema: dbUsersCrudArgsSchema,   // Zod Schema：约束参数类型和必填
+  },
+)
+```
+
+### Schema → LLM → 回调的完整链路
+
+```
+Schema（你定义的）  →  LLM 的 function calling  →  回调函数的参数
+────────────────────────────────────────────────────────────
+action: enum        →  描述告诉 LLM 这个工具干吗  →  toolCall.args
+id: number (opt)    →  LLM 决定调用后按 schema    = { action: "get",
+name: string (opt)  →  生成参数，保证类型正确        id: 3 }
+email: string (opt) →                            → 传入你的回调
+```
+
+### Agent Loop while(true) 为什么不会死循环
+
+```ts
+while (true) {
+  const aiMessage = await this.modelWithTools.invoke(messages);
+  const toolCalls = aiMessage.tool_calls ?? [];
+  if (!toolCalls.length) return aiMessage.content as string;  // ← 唯一退出点
+  for (const tc of toolCalls) {
+    const result = await someTool.invoke(tc.args);  // 执行工具
+    messages.push(new ToolMessage({ content: result }));  // 结果写回上下文
+  }
+  // → 回到 while 顶部，LLM 看到工具结果，继续或结束
+}
+```
+
+## 前端 SSE 页面
+
+```html
+<script>
+const es = new EventSource(`/ai/chat/stream?query=${encodeURIComponent(query)}`);
+es.onmessage = (event) => { outputEl.textContent += event.data; };
+es.onerror = () => es.close();
+</script>
 ```
 
 ---
@@ -146,9 +230,11 @@ async *runChainStream(query: string): AsyncIterable<string> {
 | Agent Loop | 无 | 同步 + 流式两个版本 |
 | 外部服务 | 无 | MySQL、SMTP、Bocha API |
 | 调度 | 无 | @nestjs/schedule |
+| 定时执行 | 无 | JobAgentService + SchedulerRegistry |
 
 ## 心得
 
-- **Tool 的 Provider 化**：每个 Tool 是独立可测试的 Provider，通过 DI 注入到 AiService。这比把所有逻辑写在一个文件里清晰得多
-- **流式 Agent Loop 的精髓**：`chunk.content` 只在没有 `tool_call_chunks` 时才 yield——用户看不到工具调用的过程，只看到最终回答流
-- **定时任务的设计**：Tool 不直接执行任务，只负责创建/管理。真正执行时另起 Agent Loop——关注点分离
+- **Tool 的 Provider 化**：每个 Tool 是独立可测试的 Provider，通过 DI 注入到 AiService
+- **流式 Agent Loop 的精髓**：`chunk.content` 只在没有 `tool_call_chunks` 时才 yield——用户看不到工具调用过程
+- **定时任务的设计**：Tool 只负责创建/管理，真正执行由 JobAgentService 另起 Agent Loop——关注点分离
+- **两个 Agent Loop 隔离**：交互 Loop 有 cron_job，定时 Loop 没有——防嵌套创建

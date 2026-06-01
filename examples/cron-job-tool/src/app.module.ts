@@ -10,24 +10,34 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
 import { Job } from './job/entities/job.entity';
-import { CronExpression, ScheduleModule, SchedulerRegistry } from '@nestjs/schedule';
+import {
+  CronExpression,
+  ScheduleModule,
+  SchedulerRegistry,
+} from '@nestjs/schedule';
 import { JobModule } from './job/job.module';
 import { CronJob } from 'cron';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: 'admin',
-      database: 'hello',
-      synchronize: true,
-      connectorPackage: 'mysql2',
-      logging: true,
-      entities: [User, Job],
+    // 数据库配置从环境变量读取，兼容不同开发环境
+    // 如果本地没有 MySQL，可以设置 MYSQL_DATABASE=:memory: 但不支持 TypeORM 的 mysql 驱动
+    // 需要 MySQL: brew install mysql && brew services start mysql
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        type: 'mysql',
+        host: config.get<string>('MYSQL_HOST') || 'localhost',
+        port: Number(config.get<string>('MYSQL_PORT')) || 3306,
+        username: config.get<string>('MYSQL_USER') || 'root',
+        password: config.get<string>('MYSQL_PASSWORD') || '',
+        database: config.get<string>('MYSQL_DATABASE') || 'hello',
+        synchronize: true,
+        connectorPackage: 'mysql2',
+        logging: true,
+        entities: [User, Job],
+      }),
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
@@ -73,7 +83,6 @@ export class AppModule implements OnApplicationBootstrap {
     // setTimeout(() => {
     //   this.schedulerRegistry.deleteCronJob('job1');
     // }, 5000);
-
     // const intervalRef = setInterval(() => {
     //   console.log('run interval job');
     // }, 1000);
@@ -81,7 +90,6 @@ export class AppModule implements OnApplicationBootstrap {
     // setTimeout(() => {
     //   this.schedulerRegistry.deleteInterval('interval1');
     // }, 5000);
-
     // const timeoutRef = setTimeout(() => {
     //   console.log('run timeout job');
     // }, 3000);
@@ -91,4 +99,3 @@ export class AppModule implements OnApplicationBootstrap {
     // }, 5000);
   }
 }
-

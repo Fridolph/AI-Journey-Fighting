@@ -41,7 +41,9 @@ export class CronJobToolService {
         .int()
         .positive()
         .optional()
-        .describe('固定间隔毫秒（type=every 时需要，例如 60000 表示每分钟执行一次）'),
+        .describe(
+          '固定间隔毫秒（type=every 时需要，例如 60000 表示每分钟执行一次）',
+        ),
       at: z
         .string()
         .optional()
@@ -76,7 +78,7 @@ export class CronJobToolService {
             if (!jobs.length) return '当前没有任何定时任务。';
             const lines = jobs
               .map((j: any) => {
-                return `id=${j.id} type=${j.type} enabled=${j.isEnabled} running=${j.running} cron=${j.cron ?? ''} everyMs=${j.everyMs ?? ''} at=${j.at instanceof Date ? j.at.toISOString() : j.at ?? ''} instruction=${j.instruction ?? ''}`;
+                return `id=${j.id} type=${j.type} enabled=${j.isEnabled} running=${j.running} cron=${j.cron ?? ''} everyMs=${j.everyMs ?? ''} at=${j.at instanceof Date ? j.at.toISOString() : (j.at ?? '')} instruction=${j.instruction ?? ''}`;
               })
               .join('\n');
             return `当前定时任务列表（type 说明：cron=按表达式循环；every=按间隔循环；at=到点执行一次后自动停用）：\n${lines}`;
@@ -144,4 +146,3 @@ export class CronJobToolService {
     );
   }
 }
-
