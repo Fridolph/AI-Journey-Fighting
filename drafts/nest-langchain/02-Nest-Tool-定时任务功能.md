@@ -268,6 +268,57 @@ if (!fullAIMessage) return;  // stream 一个 chunk 都没有 → 防御性退�
 
 ---
 
+## Tool 标准骨架（速查模板）
+
+所有 tool 遵循同一模式：
+
+```ts
+@Injectable()
+export class XxxToolService {
+  readonly tool;                          // ① 工具实例
+
+  @Inject(XxxService)                     // ② 注入业务服务（constructor 前已完成）
+  private readonly xxxService: XxxService;
+
+  constructor() {
+    const schema = z.object({             // ③ Zod Schema：LLM 靠这个知道参数格式
+      action: z.enum(['a','b']).describe('操作类型'),
+      id: z.number().optional().describe('ID'),
+    });
+
+    this.tool = tool(                     // ④ 工具定义
+      async ({ action, id }) => {
+        switch (action) {
+          case 'a': return '结果字符串';   // ⑤ 必须 return string
+          case 'b': if (!id) return '报错'; // ⑥ 错误用 return 不用 throw
+        }
+      },
+      { name: 'tool_name', description: '用途', schema },
+    );
+  }
+}
+```
+
+### 三个关键细节
+
+**`.describe()` 决定 LLM 传参质量：**
+```ts
+// ❌ 模糊
+at: z.string().optional().describe('时间')
+// ✅ 精确
+at: z.string().optional().describe('指定触发时间点，ISO 字符串如 2026-03-18T12:34:56.000Z')
+```
+
+**返回值必须对 LLM 友好：**
+```ts
+// ❌ return { id: 1, name: '张三' }       → LLM 读不懂
+// ✅ return 'ID=1，姓名=张三，邮箱=z@x.com' → LLM 能理解
+```
+
+**五个 Tool 复杂度：** `time-now` ★☆☆ → `send-mail` ★★☆ → `web-search` ★★★ → `db-users-crud` ★★★★ → `cron-job` ★★★★★
+
+---
+
 ## 关键对比：hello-nest-langchain vs cron-job-tool
 
 | | hello-nest | cron-job-tool |
