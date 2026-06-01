@@ -221,6 +221,53 @@ es.onerror = () => es.close();
 
 ---
 
+## 深度答疑
+
+### ① ReAct 每轮都查时间/用户名，浪费 token？
+
+**确实会浪费，这是 ReAct 的固有成本。** 生产环境优化方案：
+
+| 方案 | 做法 | 适合场景 |
+|------|------|---------|
+| System Prompt 预注入 | `SystemMessage("当前时间：${now}\n用户：${name}")` | 固定上下文 |
+| 缓存 | `if (toolName==='time_now' && cache.has('time_1s')) return cache` | 高频重复查询 |
+| Plan & Execute | 先让 LLM 一次性规划所有工具 → 并行执行 → 一次性回答 | 步骤固定的流程 |
+| ReAct | 接受 token 成本 | 需要动态决策 |
+
+### ② cron_job 创建了但任务不执行
+
+`cron_job.add()` 只是**写入数据库**，真正执行靠 `JobService.startRuntime()` → `JobAgentService.runJob()`。
+
+排查清单：
+1. `job-agent.service.ts` 是否在模块里注册
+2. 调度器轮询间隔是否太短/还没到触发时间
+3. `at` 类型的时间是否有时区问题
+4. `instruction` 是否被 LLM 写成了工具调用格式而非自然语言
+
+### ③ 第3轮只到"设置任务"就结束，正常吗？
+
+**正常。** 正确设计：
+```
+当前轮：登记任务 → 告诉用户"已创建" ✅
+未来轮：job-agent 触发 → 真正执行 ✅
+```
+
+System Prompt 明确约束："本轮对话只用 cron_job 设置任务，不要在当前轮直接完成这个动作本身"。
+
+### ④ `if (!fullAIMessage) return` 为什么这样判断
+
+```ts
+let fullAIMessage: AIMessageChunk | null = null;
+for await (const chunk of stream) {
+  fullAIMessage = fullAIMessage ? fullAIMessage.concat(chunk) : chunk;
+}
+if (!fullAIMessage) return;  // stream 一个 chunk 都没有 → 防御性退出
+```
+
+可能触发场景：网络超时、API 限流、模型返回空响应。没有这个判断 → `messages.push(null)` → `null.tool_calls` → 崩溃。
+
+---
+
 ## 关键对比：hello-nest-langchain vs cron-job-tool
 
 | | hello-nest | cron-job-tool |
