@@ -319,6 +319,63 @@ at: z.string().optional().describe('指定触发时间点，ISO 字符串如 202
 
 ---
 
+## 三个 Nest 核心概念
+
+### 1. `forwardRef` — 循环依赖
+
+`ToolModule → JobModule` 且 `JobModule → ToolModule`，互相引用。用 `forwardRef(() => Module)` 延迟求值解决：
+
+```
+没有 forwardRef：NestJS "先初始化谁？" → 💥 报错
+有 forwardRef：  NestJS "先建壳，再互相填充引用" → ✅
+```
+
+### 2. `SchedulerRegistry` — 运行时任务登记表
+
+`@nestjs/schedule` 提供的内存调度器，管理三个 Map：
+
+| 方法 | 作用 |
+|------|------|
+| `addCronJob/Interval/Timeout(id, ref)` | 注册 |
+| `getCronJobs/Intervals/Timeouts()` | 查询 |
+| `deleteCronJob/Interval/Timeout(id)` | 删除 |
+
+`onApplicationBootstrap()` 用它将数据库中的 `isEnabled=true` 任务恢复到内存。
+
+### 3. `CronJob` — cron 库的任务实例
+
+```ts
+import { CronJob } from 'cron';
+const job = new CronJob('*/5 * * * * *', () => { ... });  // 每5秒
+job.start();
+```
+
+Cron 表达式（6位）：`秒 分 时 日 月 星期`
+
+## 完整执行链路
+
+```
+服务器启动
+  → ToolModule ←forwardRef→ JobModule（循环依赖解决）
+  → onApplicationBootstrap() 从 MySQL 恢复 isEnabled=true 的 Job 到 SchedulerRegistry
+
+用户："1分钟后发笑话邮件"
+  → AiService Agent Loop
+     Round1: time_now → "20:07"
+     Round2: cron_job.add → 存 MySQL → startRuntime() → setTimeout(60s) → 注册到 SchedulerRegistry
+     Round3: toolCalls=[] → "已设置"  ← 结束，不发邮件
+
+60秒后...
+  → SchedulerRegistry 触发 Timeout
+  → JobAgentService.runJob("发笑话")  ← 另起 Agent Loop（无 cron_job tool）
+     Round1: web_search("笑话") → 搜索结果
+     Round2: send_mail(...) → 发送完成
+     Round3: toolCalls=[] → 任务完成
+  → 更新 MySQL + 清理 SchedulerRegistry
+```
+
+---
+
 ## 关键对比：hello-nest-langchain vs cron-job-tool
 
 | | hello-nest | cron-job-tool |
