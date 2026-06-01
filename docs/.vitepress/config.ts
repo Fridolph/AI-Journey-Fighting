@@ -172,6 +172,7 @@ export default defineConfig({
       '/': [
         {
           text: 'AI学习记录',
+          collapsed: true,
           items: [
             { text: 'AGENTS 总览', link: '/agents/' },
             { text: 'AI 概念地图', link: '/agents/concept-map/' },
@@ -182,6 +183,26 @@ export default defineConfig({
             { text: '多模态应用', link: '/agents/multimodal/' },
             { text: '项目实战', link: '/agents/projects/' },
             { text: '学习资源', link: '/agents/resources/' }
+          ]
+        },
+        {
+          text: '全栈开发',
+          collapsed: true,
+          items: [
+            { text: '数据库总览与选型', link: '/agents/fullstack/database/' },
+            { text: '数据库核心概念', link: '/agents/fullstack/' },
+            { text: 'MySQL 基础', link: '/agents/fullstack/database/mysql-basics' },
+            { text: 'MySQL 进阶', link: '/agents/fullstack/database/mysql-advanced' },
+            { text: 'SQLite 基础', link: '/agents/fullstack/database/sqlite-basics' },
+            { text: 'PostgreSQL 基础', link: '/agents/fullstack/database/postgresql-basics' },
+            { text: 'PostgreSQL 进阶', link: '/agents/fullstack/database/postgresql-advanced' },
+            { text: 'MongoDB 基础', link: '/agents/fullstack/database/mongodb-basics' },
+            { text: 'MongoDB 进阶', link: '/agents/fullstack/database/mongodb-advanced' },
+            { text: 'Redis 基础', link: '/agents/fullstack/database/redis-basics' },
+            { text: 'Redis 进阶', link: '/agents/fullstack/database/redis-advanced' },
+            { text: 'Elasticsearch 基础', link: '/agents/fullstack/database/elasticsearch-basics' },
+            { text: 'Elasticsearch 进阶', link: '/agents/fullstack/database/elasticsearch-advanced' },
+            { text: 'IndexedDB', link: '/agents/fullstack/database/indexeddb' },
           ]
         },
         {
