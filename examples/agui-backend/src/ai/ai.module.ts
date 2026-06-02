@@ -9,7 +9,8 @@ import { MailerService } from '@nestjs-modules/mailer';
 
 @Module({
   controllers: [AiController],
-  providers: [AiService,
+  providers: [
+    AiService,
     {
       provide: 'CHAT_MODEL',
       useFactory: (configService: ConfigService) => {
@@ -39,14 +40,14 @@ import { MailerService } from '@nestjs-modules/mailer';
             .optional()
             .describe('返回的搜索结果数量，默认 10 条'),
         });
-    
+
         return tool(
           async ({ query, count }: { query: string; count?: number }) => {
             const apiKey = configService.get<string>('BOCHA_API_KEY');
             if (!apiKey) {
               return 'Bocha Web Search 的 API Key 未配置（环境变量 BOCHA_API_KEY），请先在服务端配置后再重试。';
             }
-    
+
             const url = 'https://api.bochaai.com/v1/web-search';
             const body = {
               query,
@@ -54,7 +55,7 @@ import { MailerService } from '@nestjs-modules/mailer';
               summary: true,
               count: count ?? 10,
             };
-    
+
             const response = await fetch(url, {
               method: 'POST',
               headers: {
@@ -63,29 +64,29 @@ import { MailerService } from '@nestjs-modules/mailer';
               },
               body: JSON.stringify(body),
             });
-    
+
             if (!response.ok) {
               const errorText = await response.text();
               return `搜索 API 请求失败，状态码: ${response.status}, 错误信息: ${errorText}`;
             }
-    
+
             let json: any;
             try {
               json = await response.json();
             } catch (e) {
               return `搜索 API 请求失败，原因是：搜索结果解析失败 ${(e as Error).message}`;
             }
-    
+
             try {
               if (json.code !== 200 || !json.data) {
                 return `搜索 API 请求失败，原因是: ${json.msg ?? '未知错误'}`;
               }
-    
+
               const webpages = json.data.webPages?.value ?? [];
               if (!webpages.length) {
                 return '未找到相关结果。';
               }
-    
+
               const formatted = webpages
                 .map(
                   (page: any, idx: number) =>
@@ -98,7 +99,7 @@ import { MailerService } from '@nestjs-modules/mailer';
     发布时间: ${page.dateLastCrawled}`,
                 )
                 .join('\n\n');
-    
+
               return formatted;
             } catch (e) {
               return `搜索 API 请求失败，原因是：搜索结果解析失败 ${(e as Error).message}`;
@@ -116,26 +117,31 @@ import { MailerService } from '@nestjs-modules/mailer';
     },
     {
       provide: 'SEND_MAIL_TOOL',
-      useFactory: (mailerService: MailerService, configService: ConfigService) => {
+      useFactory: (
+        mailerService: MailerService,
+        configService: ConfigService,
+      ) => {
         const sendMailArgsSchema = z.object({
-          to: z
-            .email()
-            .describe('收件人邮箱地址，例如：someone@example.com'),
+          to: z.email().describe('收件人邮箱地址，例如：someone@example.com'),
           subject: z.string().describe('邮件主题'),
           text: z.string().optional().describe('纯文本内容，可选'),
           html: z.string().optional().describe('HTML 内容，可选'),
         });
-    
+
         return tool(
-          async ({to, subject, text, html}: {
+          async ({
+            to,
+            subject,
+            text,
+            html,
+          }: {
             to: string;
             subject: string;
             text?: string;
             html?: string;
           }) => {
-            const fallbackFrom =
-              configService.get<string>('MAIL_FROM')
-    
+            const fallbackFrom = configService.get<string>('MAIL_FROM');
+
             await mailerService.sendMail({
               to,
               subject,
@@ -143,7 +149,7 @@ import { MailerService } from '@nestjs-modules/mailer';
               html: html ?? `<p>${text ?? '（无 HTML 内容）'}</p>`,
               from: fallbackFrom,
             });
-    
+
             return `邮件已发送到 ${to}，主题为「${subject}」`;
           },
           {

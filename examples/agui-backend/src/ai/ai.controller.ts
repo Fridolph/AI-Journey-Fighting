@@ -9,9 +9,9 @@ export class AiController {
 
   /**
     本地测试：
-    curl -N -sS -X POST 'http://localhost:3000/ai/chat' \
+    curl -N -sS -X POST 'http://localhost:3090/ai/chat' \
       -H 'Content-Type: application/json' \
-      -d '{"messages":[{"id":"1","role":"user","parts":[{"type":"text","text":"北京今天的天气"}]}]}'
+      -d '{"messages":[{"id":"1","role":"user","parts":[{"type":"text","text":"成都今天的天气"}]}]}'
    */
   @Post('chat')
   async postChat(
