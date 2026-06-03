@@ -179,7 +179,19 @@ export default defineConfig({
             { text: '概念地图维护说明', link: '/agents/concept-map/maintain' },
             { text: '大模型基础', link: '/agents/foundation/' },
             { text: '提示词工程', link: '/agents/prompt-engineering/' },
-            { text: 'Agent开发', link: '/agents/agent-development/' },
+            {
+              text: 'Agent开发',
+              collapsed: true,
+              items: [
+                { text: '总览', link: '/agents/agent-development/' },
+                { text: '01 从 Prompt 到 Tool', link: '/agents/agent-development/01-prompt-to-tool' },
+                { text: '02 Agent 记忆系统', link: '/agents/agent-development/02-agent-memory' },
+                { text: '03 RAG 与 Milvus', link: '/agents/agent-development/03-rag-milvus' },
+                { text: '04 简历 RAG 七次迭代', link: '/agents/agent-development/04-resume-rag-iterations' },
+                { text: '05 LCEL 链式组装', link: '/agents/agent-development/05-lcel-runnable' },
+                { text: '06 NestJS 集成', link: '/agents/agent-development/06-nestjs-langchain' },
+              ]
+            },
             { text: '多模态应用', link: '/agents/multimodal/' },
             { text: '项目实战', link: '/agents/projects/' },
             { text: '学习资源', link: '/agents/resources/' }
