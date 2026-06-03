@@ -52,7 +52,7 @@ const graph = new StateGraph(MessagesAnnotation)
 const result = await graph.invoke({
   messages: [
     new HumanMessage(
-      "查一下 SKU-001 的库存还有多少，回答里带上商品名和数字。"
+      "查一下 SKU-003 的库存还有多少，回答里带上商品名和数字。"
     ),
   ],
 });

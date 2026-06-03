@@ -14,6 +14,9 @@ const model = new ChatOpenAI({
   configuration: {
     baseURL: process.env.OPENAI_BASE_URL,
   },
+  modelKwargs: {
+    parallel_tool_calls: false,
+  },
 });
 
 const lookupWeatherTool = tool(
@@ -94,5 +97,7 @@ for await (const event of stream) {
 }
 
 console.log("路径:", nodePath.join(" → "));
-const last = finalState?.messages?.at(-1);
-console.log(last?.content ?? finalState?.messages);
+// const last = finalState?.messages?.at(-1);
+// console.log(last?.content ?? finalState?.messages);
+const answers = messages.filter(isAI && hasContent && noToolCalls);
+answers.forEach((m, i) => console.log(`[${i + 1}]`, m.content));

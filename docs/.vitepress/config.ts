@@ -190,6 +190,12 @@ export default defineConfig({
                 { text: '04 简历 RAG 七次迭代', link: '/agents/agent-development/04-resume-rag-iterations' },
                 { text: '05 LCEL 链式组装', link: '/agents/agent-development/05-lcel-runnable' },
                 { text: '06 NestJS 集成', link: '/agents/agent-development/06-nestjs-langchain' },
+                { text: '07 LangGraph 热身：从图开始', link: '/agents/agent-development/07-langgraph-warmup' },
+                { text: '08 LangGraph 从图到代码', link: '/agents/agent-development/08-langgraph-code' },
+                { text: '09 LangGraph interrupt 暂停', link: '/agents/agent-development/09-langgraph-interrupt' },
+                { text: '10 LangGraph prebuilt Agent', link: '/agents/agent-development/10-langgraph-prebuilt-agent' },
+                { text: '11 LangGraph Multi-Agent', link: '/agents/agent-development/11-langgraph-multi-agent' },
+                { text: '12 LangGraph 架构对比与实战', link: '/agents/agent-development/12-langgraph-architecture-compare' },
               ]
             },
             { text: '多模态应用', link: '/agents/multimodal/' },
