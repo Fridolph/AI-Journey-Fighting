@@ -119,33 +119,83 @@ const router = routerLlm.withStructuredOutput(RouteSchema, {
 
 ---
 
-## 脚本四：rag-multihop.mjs — 多跳检索
+## 脚本四：rag-multihop.mjs — 多跳检索（核心升级）
+
+### 流程图
 
 ```
-复杂问题 → 拆解子问题 → [检索 → 分析 → 决定是否继续] → 汇总 → 生成
-
-节点：decompose → retrieve → analyze → commit_sub → aggregate → generate
+START → route_question
+              │
+    ┌─────────┴─────────┐
+    ▼                   ▼
+  simple              complex
+    │                   │
+direct_answer       decompose      ← 新增：LLM 拆解子问题
+    │                   │
+    ▼                   ▼
+  END               retrieve       ← 每次取一个子问题检索
+                        │
+                        ▼
+                 plan_next_step    ← 新增：判断是否继续
+                   │         │
+             retrieve ←──→ generate → END
+             （循环）      （终止）
 ```
 
-LLM 先拆成多个子问题，逐个检索，最后汇总生成。适合「雁门关事件的主谋，他的儿子最终结局」这类需要拼多个知识点的问题。
+### 三个核心机制
 
----
+**① decompose_question — 子问题拆解：**
+一条复杂问题被 LLM 拆成有序子问题数组，每条必须独立可检索（不允许"他/她/此人"等指代）。
 
-## 应用到 my-resume 项目
-
+**② nextSubIdx 游标驱动循环：**
+```js
+第1轮：idx=0 → 检索子问题[0] → idx变成1
+第2轮：idx=1 → 检索子问题[1] → 返回 { nextSubIdx: idx + 1 }
 ```
-State: { question, intent, context, generation }
+游标是驱动引擎，`plan_next_step` 判断是否继续。
 
-节点：
-  route_intent  → 闲聊 / 引导 / 简历问答
-  chitchat      → 直接回复
-  guide         → 返回引导词
-  retrieve      → Milvus 检索简历
-  rag_answer    → 基于简历内容生成回答
-
-流转：
-  START → route_intent
-  route_intent --[chitchat]--→ chitchat       → END
-  route_intent --[guide]----→ guide          → END
-  route_intent --[resume]---→ retrieve       → rag_answer → END
+**③ plan_next_step 循环终止判断（双重保险）：**
+```js
+if (remaining <= 0) → generate          // 硬性兜底
+if (retrievalCount >= maxRetrievals)    // 硬性兜底
+    → generate
+LLM 感觉够了 → generate                  // 模型判断
+否则 → retrieve
 ```
+
+**④ mergeUnique 多轮去重：**
+
+多轮检索可能召回同一文档，按 id 去重 + 保留更高 score。
+
+### 三个脚本演进对比
+
+| 能力 | naive-rag | query-router | multihop |
+|---|---|---|---|
+| 简单问题跳过检索 | ❌ | ✅ | ✅ |
+| 问题路由分流 | ❌ | ✅ | ✅ |
+| 复杂问题拆子问题 | ❌ | ❌ | ✅ |
+| 多轮循环检索 | ❌ | ❌ | ✅ |
+| 跨轮文档去重 | ❌ | ❌ | ✅ |
+| 防死循环保护 | ❌ | ❌ | ✅ |
+
+### 实测评估
+
+问题：「四大恶人排行第二的是谁？此人之子在身世揭晓前，其生父在武林中的公开身份是什么？」
+
+| 环节 | 评分 | 说明 |
+|---|---|---|
+| 路由 | ⭐⭐⭐⭐⭐ | strategy=complex ✓ |
+| 子问题拆解 | ⭐⭐⭐ | 模型把「第二」自作聪明改成「之首」拆题 |
+| 多轮检索 | ⭐⭐⭐⭐ | 机制正确，召回覆盖关键情节 |
+| 最终回答 | ⭐⭐⭐⭐ | generate 节点靠文档自我纠正回正确 |
+
+**核心洞察：** 子问题拆解质量决定检索链走向。Prompt 需加硬约束禁止模型"修正"用户问题。
+
+### withStructuredOutput 的 llm 分工规则
+
+| 节点 | 使用的 llm | 原因 |
+|---|---|---|
+| `routeQuestion / decompose / planNext` | `routerLlm` | 需要结构化输出，thinking 必须关 |
+| `directAnswer / generate` | `llm` | 普通流式生成，thinking 无影响 |
+
+**凡是 `withStructuredOutput` 都用 `routerLlm`；普通 `stream`/`invoke` 用 `llm`。**
