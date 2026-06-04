@@ -8,12 +8,14 @@ const weatherTable = {
   杭州: { summary: "多云转小雨", tempHighC: 22, tempLowC: 15, aqi: "良" },
   北京: { summary: "晴", tempHighC: 26, tempLowC: 12, aqi: "轻度污染" },
   上海: { summary: "阴", tempHighC: 20, tempLowC: 16, aqi: "良" },
+  成都: { summary: "多云", tempHighC: 29, tempLowC: 21, aqi: "中度污染" },
 };
 
 const triviaTable = {
   杭州: "西湖文化景观是世界文化遗产之一。",
   北京: "故宫是世界上现存规模最大的古代宫殿建筑群之一。",
   上海: "外滩万国建筑博览群是近代城市历史的缩影。",
+  成都: "成都是全球唯一能在市中心直接看到雪山的超大城市。",
 };
 
 /** 查某地当日天气摘要（模拟） */
@@ -38,6 +40,6 @@ export function lookupCityTrivia(city) {
   const line = triviaTable[c];
   return JSON.stringify({
     city: c,
-    trivia: line ?? `没有为「${c}」准备内置小知识，可换杭州/北京/上海试试。`,
+    trivia: line ?? `没有为「${c}」准备内置小知识，可换杭州/北京/上海/成都试试。`,
   });
 }

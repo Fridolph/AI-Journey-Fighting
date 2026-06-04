@@ -5,7 +5,7 @@ import { MessagePart } from './components/ToolPanels'
 import './App.css'
 
 /** 后端根地址（与本地 `agui-backend` 默认端口一致） */
-const API_BASE = 'http://localhost:3000'
+const API_BASE = 'http://localhost:3090'
 
 export default function App() {
   const chatUrl = `${API_BASE}/ai/chat`

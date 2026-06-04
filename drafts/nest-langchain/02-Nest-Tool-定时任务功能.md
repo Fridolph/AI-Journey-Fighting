@@ -268,6 +268,138 @@ if (!fullAIMessage) return;  // stream 一个 chunk 都没有 → 防御性退�
 
 ---
 
+## Tool 标准骨架（速查模板）
+
+所有 tool 遵循同一模式：
+
+```ts
+@Injectable()
+export class XxxToolService {
+  readonly tool;                          // ① 工具实例
+
+  @Inject(XxxService)                     // ② 注入业务服务（constructor 前已完成）
+  private readonly xxxService: XxxService;
+
+  constructor() {
+    const schema = z.object({             // ③ Zod Schema：LLM 靠这个知道参数格式
+      action: z.enum(['a','b']).describe('操作类型'),
+      id: z.number().optional().describe('ID'),
+    });
+
+    this.tool = tool(                     // ④ 工具定义
+      async ({ action, id }) => {
+        switch (action) {
+          case 'a': return '结果字符串';   // ⑤ 必须 return string
+          case 'b': if (!id) return '报错'; // ⑥ 错误用 return 不用 throw
+        }
+      },
+      { name: 'tool_name', description: '用途', schema },
+    );
+  }
+}
+```
+
+### 三个关键细节
+
+**`.describe()` 决定 LLM 传参质量：**
+```ts
+// ❌ 模糊
+at: z.string().optional().describe('时间')
+// ✅ 精确
+at: z.string().optional().describe('指定触发时间点，ISO 字符串如 2026-03-18T12:34:56.000Z')
+```
+
+**返回值必须对 LLM 友好：**
+```ts
+// ❌ return { id: 1, name: '张三' }       → LLM 读不懂
+// ✅ return 'ID=1，姓名=张三，邮箱=z@x.com' → LLM 能理解
+```
+
+**五个 Tool 复杂度：** `time-now` ★☆☆ → `send-mail` ★★☆ → `web-search` ★★★ → `db-users-crud` ★★★★ → `cron-job` ★★★★★
+
+---
+
+## 三个 Nest 核心概念
+
+### 1. `forwardRef` — 循环依赖
+
+`ToolModule → JobModule` 且 `JobModule → ToolModule`，互相引用。用 `forwardRef(() => Module)` 延迟求值解决：
+
+```
+没有 forwardRef：NestJS "先初始化谁？" → 💥 报错
+有 forwardRef：  NestJS "先建壳，再互相填充引用" → ✅
+```
+
+### 2. `SchedulerRegistry` — 运行时任务登记表
+
+`@nestjs/schedule` 提供的内存调度器，管理三个 Map：
+
+| 方法 | 作用 |
+|------|------|
+| `addCronJob/Interval/Timeout(id, ref)` | 注册 |
+| `getCronJobs/Intervals/Timeouts()` | 查询 |
+| `deleteCronJob/Interval/Timeout(id)` | 删除 |
+
+`onApplicationBootstrap()` 用它将数据库中的 `isEnabled=true` 任务恢复到内存。
+
+### 3. `CronJob` — cron 库的任务实例
+
+```ts
+import { CronJob } from 'cron';
+const job = new CronJob('*/5 * * * * *', () => { ... });  // 每5秒
+job.start();
+```
+
+Cron 表达式（6位）：`秒 分 时 日 月 星期`
+
+### 4. 为什么不用 Redis？为什么数据库 + 内存双层？
+
+**`setTimeout` / `setInterval` / `CronJob` 返回的是进程内存中的"句柄对象"，无法序列化存入 Redis。** Redis 和 SchedulerRegistry 不是同一层的东西：
+
+| | 数据库 | SchedulerRegistry | Redis |
+|--|--------|-------------------|-------|
+| 存什么 | 任务描述（纯数据） | Timer/CronJob 句柄 | Key-Value 数据 |
+| 持久化 | ✅ 永久 | ❌ 进程存活期间 | ✅ |
+| 超时触发 | ❌ 不能 | ✅ 真正倒计时 | ❌ 不能 |
+
+**类比：**
+```
+数据库 = 备忘录本子 → "明天早上8点叫我起床"
+SchedulerRegistry = 手机闹钟 → 真正在倒计时、到点会震动
+光有备忘录不会叫你起床，必须"设置成闹钟"才会触发
+```
+
+**两者缺一不可：**
+- 只有数据库 → 读到任务但没注册 Timer → 永远不触发 ❌
+- 只有 SchedulerRegistry → 重启后内存清空 → 任务全部丢失 ❌
+- 两者配合 → 数据库持久化 + 内存执行 + `onApplicationBootstrap` 重启同步 ✅
+
+**Redis 的定位：** 解决分布式多实例问题（Bull/BullMQ 任务队列），和本地调度不在同一维度。
+
+## 完整执行链路
+
+```
+服务器启动
+  → ToolModule ←forwardRef→ JobModule（循环依赖解决）
+  → onApplicationBootstrap() 从 MySQL 恢复 isEnabled=true 的 Job 到 SchedulerRegistry
+
+用户："1分钟后发笑话邮件"
+  → AiService Agent Loop
+     Round1: time_now → "20:07"
+     Round2: cron_job.add → 存 MySQL → startRuntime() → setTimeout(60s) → 注册到 SchedulerRegistry
+     Round3: toolCalls=[] → "已设置"  ← 结束，不发邮件
+
+60秒后...
+  → SchedulerRegistry 触发 Timeout
+  → JobAgentService.runJob("发笑话")  ← 另起 Agent Loop（无 cron_job tool）
+     Round1: web_search("笑话") → 搜索结果
+     Round2: send_mail(...) → 发送完成
+     Round3: toolCalls=[] → 任务完成
+  → 更新 MySQL + 清理 SchedulerRegistry
+```
+
+---
+
 ## 关键对比：hello-nest-langchain vs cron-job-tool
 
 | | hello-nest | cron-job-tool |

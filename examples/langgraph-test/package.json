@@ -4,12 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev": "node src/multi-agent-pro-1.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
     "@langchain/core": "^1.1.39",
     "@langchain/langgraph": "^1.2.8",
@@ -18,6 +19,6 @@
     "@langchain/openai": "^1.4.4",
     "dotenv": "^17.4.1",
     "langchain": "^1.3.1",
-    "zod": "^4.3.6"
+    "zod": "^3.25.76"
   }
 }
