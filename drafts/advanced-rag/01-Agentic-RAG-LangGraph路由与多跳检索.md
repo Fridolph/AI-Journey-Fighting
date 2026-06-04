@@ -167,6 +167,35 @@ LLM 感觉够了 → generate                  // 模型判断
 
 多轮检索可能召回同一文档，按 id 去重 + 保留更高 score。
 
+### GraphState 设计推导法
+
+**不是背出来的，是从业务流程推导出来的。**
+
+第一步：画流程图，列出每个节点读什么、写什么：
+
+| 节点 | 需要读 | 需要写 |
+|---|---|---|
+| `route` | `question` | `strategy`, `routeReason` |
+| `decompose` | `question` | `subQuestions`, `nextSubIdx` |
+| `retrieve` | `subQuestions`, `nextSubIdx`, `k` | `documents`, `retrievalCount`, `nextSubIdx` |
+| `plan` | `subQuestions`, `nextSubIdx`, `documents`, `retrievalCount`, `maxRetrievals` | `plannedNext` |
+| `generate` | `documents`, `question` | `generation` |
+
+第二步：合并去重所有字段 → 得到 GraphState。
+
+第三步：特别补充**循环记忆**字段（有 retrieve ↔ plan 来回跳时必须的）：
+
+| 字段 | 作用 |
+|------|------|
+| `nextSubIdx` | 游标：当前该检索第几个子问题 |
+| `retrievalCount` | 已检索几轮，防止死循环 |
+| `maxRetrievals` | 上限配置 |
+| `plannedNext` | 下一跳是 retrieve 还是 generate |
+
+**两个常见错误：**
+- ❌ 把节点内部的临时变量放进了 State（原则：只放跨节点传递的）
+- ❌ 忘了补充循环记忆字段（有循环就必须有游标 + 计数器 + 终止条件）
+
 ### 三个脚本演进对比
 
 | 能力 | naive-rag | query-router | multihop |
@@ -199,3 +228,22 @@ LLM 感觉够了 → generate                  // 模型判断
 | `directAnswer / generate` | `llm` | 普通流式生成，thinking 无影响 |
 
 **凡是 `withStructuredOutput` 都用 `routerLlm`；普通 `stream`/`invoke` 用 `llm`。**
+
+## 应用到 my-resume 项目
+
+```
+State: { question, intent, context, generation }
+
+节点：
+  route_intent  → 闲聊 / 引导 / 简历问答
+  chitchat      → 直接回复
+  guide         → 返回引导词
+  retrieve      → Milvus 检索简历
+  rag_answer    → 基于简历内容生成回答
+
+流转：
+  START → route_intent
+  route_intent --[chitchat]--→ chitchat       → END
+  route_intent --[guide]----→ guide          → END
+  route_intent --[resume]---→ retrieve       → rag_answer → END
+```
