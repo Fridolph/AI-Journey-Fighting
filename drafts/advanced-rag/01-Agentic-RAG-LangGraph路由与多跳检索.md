@@ -154,13 +154,41 @@ direct_answer       decompose      ← 新增：LLM 拆解子问题
 ```
 游标是驱动引擎，`plan_next_step` 判断是否继续。
 
-**③ plan_next_step 循环终止判断（双重保险）：**
+### 循环控制：用 State 字段模拟 while 循环
+
+```
+retrievalCount = 循环跑了几次（retrieve 负责 +1）
+maxRetrievals  = 循环最多跑几次（兜底防死循环）
+plannedNext    = 这次循环结束后往哪跳（plan 写入 → afterPlan 读取 → 条件边跳转）
+currentQuery   = 本轮查询句快照（纯调试，不影响逻辑）
+```
+
+**plannedNext 的数据流向：**
 ```js
-if (remaining <= 0) → generate          // 硬性兜底
-if (retrievalCount >= maxRetrievals)    // 硬性兜底
-    → generate
-LLM 感觉够了 → generate                  // 模型判断
-否则 → retrieve
+// plan 节点写入决策 → afterPlan 读取 → 条件边跳转
+return { plannedNext: "retrieve" | "generate" };
+
+function afterPlan(state) {
+  return state.plannedNext === "retrieve" ? "retrieve" : "generate";
+}
+.addConditionalEdges("plan_next_step", afterPlan, { retrieve:"retrieve", generate:"generate" })
+```
+
+**三轮循环状态变化：**
+```
+初始: retrievalCount=0, nextSubIdx=0
+第1轮: retrieve(0→1, idx 0→1) → plan(remaining=2, plannedNext="retrieve") → 跳回
+第2轮: retrieve(1→2, idx 1→2) → plan(remaining=1, plannedNext="retrieve") → 跳回
+第3轮: retrieve(2→3, idx 2→3) → plan(remaining=0, 硬性强制 "generate") → END ✅
+```
+
+**双重保险（LLM判断 + 硬性规则兜底）：**
+```js
+let finalNext = nextAction;                           // LLM 建议
+if (state.retrievalCount >= state.maxRetrievals)      // 超上限
+    finalNext = "generate";
+if (remaining <= 0)                                   // 子问题全检索完
+    finalNext = "generate";
 ```
 
 **④ mergeUnique 多轮去重：**
