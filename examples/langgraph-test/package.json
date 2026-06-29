@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "node src/multi-agent-pro-1.mjs",
+    "dev": "node src/multi-agent-supervisor-fix.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

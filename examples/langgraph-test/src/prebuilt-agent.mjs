@@ -26,6 +26,7 @@ const model = new ChatOpenAI({
   configuration: {
       baseURL: process.env.OPENAI_BASE_URL,
   },
+  modelKwargs: { thinking: { type: "disabled" } },
 });
 
 const agent = createAgent({
@@ -37,7 +38,7 @@ const agent = createAgent({
 });
 
 const result = await agent.invoke(
-  { messages: [new HumanMessage("SKU-002 还剩多少库存？")] },
+  { messages: [new HumanMessage("SKU 有哪些商品，分别还剩多少库存？")] },
   { configurable: { thread_id: "demo-thread" } }
 );
 
