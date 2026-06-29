@@ -3,7 +3,7 @@ import { ChatOpenAI, OpenAIEmbeddings } from "@langchain/openai";
 import { Annotation, END, START, StateGraph } from "@langchain/langgraph";
 import { Milvus } from "@langchain/community/vectorstores/milvus";
 
-const COLLECTION_NAME = "ebook_collection";
+const COLLECTION_NAME = "ebook_jinyong_tianlongbabu";
 const TOP_K = 5;
 
 const GraphState = Annotation.Root({
@@ -15,16 +15,21 @@ const GraphState = Annotation.Root({
 
 const model = new ChatOpenAI({
     temperature: 0,
-    model: "qwen-plus",
+    model: process.env.MODEL_NAME,
+    apiKey: process.env.OPENAI_API_KEY,
     configuration: {
         baseURL: process.env.OPENAI_BASE_URL,
     },
-    apiKey: process.env.OPENAI_API_KEY,
 });
 
+// const VECTOR_DIM = 1024
 const embeddings = new OpenAIEmbeddings({
-    model: "text-embedding-v3",
+  model: process.env.EMBEDDINGS_MODEL_NAME,
     dimensions: 1024,
+    apiKey: process.env.EMBEDDINGS_API_KEY,       // ← 加上
+    configuration: {
+        baseURL: process.env.EMBEDDINGS_URL, // ← 加上
+    },
 });
 
 let vectorStore;

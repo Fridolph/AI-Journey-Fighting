@@ -33,6 +33,7 @@ export default defineConfig({
             { text: '信息图', link: '/prompts/infographics/' },
             { text: '人像诊断', link: '/prompts/portrait-analysis/' },
             { text: '纪实模拟', link: '/prompts/documentary-sim/' },
+            { text: '前端工程', link: '/prompts/frontend-engineering/' },
           ]
         },
         {
@@ -143,6 +144,23 @@ export default defineConfig({
             { text: '真实旁观抓拍', link: '/prompts/documentary-sim/bystander-snapshot' },
             { text: '伪纪录片老照片', link: '/prompts/documentary-sim/mockumentary-photo' },
             { text: '报纸头条假新闻', link: '/prompts/documentary-sim/fake-news-headline' },
+          ]
+        },
+        {
+          text: '前端工程',
+          collapsed: true,
+          items: [
+            { text: '总览', link: '/prompts/frontend-engineering/' },
+            { text: '前端架构图', link: '/prompts/frontend-engineering/01-frontend-architecture' },
+            { text: '模块依赖图', link: '/prompts/frontend-engineering/02-module-deps' },
+            { text: '交互时序图', link: '/prompts/frontend-engineering/03-sequence-diagram' },
+            { text: '数据模型图', link: '/prompts/frontend-engineering/04-data-model' },
+            { text: '状态机图', link: '/prompts/frontend-engineering/05-state-machine' },
+            { text: '页面路由流转图', link: '/prompts/frontend-engineering/06-route-flow' },
+            { text: '权限路由守卫图', link: '/prompts/frontend-engineering/07-auth-guard' },
+            { text: '外部依赖图', link: '/prompts/frontend-engineering/08-external-deps' },
+            { text: '组件生命周期图', link: '/prompts/frontend-engineering/09-component-lifecycle' },
+            { text: '架构图通用皮肤规范', link: '/prompts/frontend-engineering/skin-spec' },
           ]
         }
       ],

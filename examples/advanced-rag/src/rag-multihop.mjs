@@ -5,21 +5,33 @@ import { Annotation, END, START, StateGraph } from "@langchain/langgraph";
 import { Milvus } from "@langchain/community/vectorstores/milvus";
 
 const llm = new ChatOpenAI({
-  temperature: 0,
-  model: "qwen-plus",
-  configuration: {
-    baseURL: process.env.OPENAI_BASE_URL,
-  },
-  apiKey: process.env.OPENAI_API_KEY,
+    temperature: 0,
+    model: process.env.MODEL_NAME,
+    apiKey: process.env.OPENAI_API_KEY,
+    configuration: {
+        baseURL: process.env.OPENAI_BASE_URL,
+    },
+});
+
+// 路由专用：不带 thinking，支持 function calling
+const routerLlm = new ChatOpenAI({
+    temperature: 0,
+    model: process.env.MODEL_NAME,   // ← 固定用非 thinking 模型
+    apiKey: process.env.OPENAI_API_KEY,
+    configuration: { baseURL: process.env.OPENAI_BASE_URL },
+    modelKwargs: {
+      // 这里还是用的thinking模型，所以要关闭思考
+      thinking: { type: "disabled" },
+    },
 });
 
 const embeddings = new OpenAIEmbeddings({
-  model: "text-embedding-v3",
+  model: process.env.EMBEDDINGS_MODEL_NAME,
   dimensions: 1024,
-  configuration: {
-    baseURL: process.env.OPENAI_BASE_URL,
+  configuration: { 
+    baseURL: process.env.EMBEDDINGS_URL 
   },
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.EMBEDDINGS_API_KEY,
 });
 
 /**
@@ -86,7 +98,10 @@ const NextStepSchema = z.object({
 
 const routeQuestionNode = async (state) => {
   console.log("---ROUTE_QUESTION---");
-  const router = llm.withStructuredOutput(RouteSchema);
+  const router = routerLlm.withStructuredOutput(RouteSchema, {
+    method: "functionCalling",
+    name: "route_question",
+  });
   const route = await router.invoke(`
 你是问答路由器。请判断用户问题是否需要外部检索。
 
@@ -117,7 +132,10 @@ const DecomposeSchema = z.object({
 
 const decomposeQuestionNode = async (state) => {
   console.log("---DECOMPOSE_QUESTION---");
-  const decomposer = llm.withStructuredOutput(DecomposeSchema);
+  const decomposer = routerLlm.withStructuredOutput(DecomposeSchema, {
+    method: "functionCalling",
+    name: "decompose_question",
+  });
   const out = await decomposer.invoke(`你是《天龙八部》多跳问答的「子问题拆解器」。
 
 用户原始问题：
@@ -226,7 +244,10 @@ ${docStr}
 - 若剩余未检索子问题条数为 0，必须 nextAction=generate。
 - 若已检索轮数已达到或超过最大检索轮数，必须 nextAction=generate。`;
 
-  const model = llm.withStructuredOutput(NextStepSchema);
+  const model = routerLlm.withStructuredOutput(NextStepSchema, {
+    method: "functionCalling",
+    name: "plan_next_step",
+  });
   const { nextAction, reason } = await model.invoke(prompt);
 
   let finalNext = nextAction;
@@ -259,7 +280,7 @@ const directAnswerNode = async (state) => {
   for await (const chunk of stream) {
     const text = typeof chunk.content === "string" ? chunk.content : "";
     if (!text) continue;
-    generation += text;
+    generation += text; 
     process.stdout.write(text);
   }
   process.stdout.write("\n");
@@ -325,6 +346,8 @@ const graph = new StateGraph(GraphState)
   .addEdge("generate", END)
   .compile();
 
+const COLLECTION_NAME = 'ebook_jinyong_tianlongbabu'
+
 async function main() {
   const question =
     "《天龙八部》中「四大恶人」排行第二的是谁？此人之子在身世揭晓前，其生父在武林中的公开身份是什么？";
@@ -335,7 +358,7 @@ async function main() {
 
   console.log("连接到 Milvus...");
   vectorStore = await Milvus.fromExistingCollection(embeddings, {
-    collectionName: "ebook_collection",
+    collectionName: COLLECTION_NAME,
     url: "localhost:19530",
     textField: "content",
     primaryField: "id",
@@ -351,13 +374,13 @@ async function main() {
   console.log("✓ 已连接\n");
 
   try {
-    await vectorStore.client.loadCollection({ collection_name: "ebook_collection" });
-    console.log("✓ 集合 ebook_collection 已加载\n");
+    await vectorStore.client.loadCollection({ collection_name: COLLECTION_NAME });
+    console.log("✓ 集合 ebook_jinyong_tianlongbabu 已加载\n");
   } catch (error) {
     if (!error.message.includes("already loaded")) {
       throw error;
     }
-    console.log("✓ 集合 ebook_collection 已处于加载状态\n");
+    console.log("✓ 集合 ebook_jinyong_tianlongbabu 已处于加载状态\n");
   }
 
   console.log("=".repeat(80));
