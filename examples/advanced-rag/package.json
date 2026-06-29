@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "dev": "node src/rag-multihop.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

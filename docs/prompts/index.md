@@ -21,6 +21,16 @@
 | 13 | [真实旁观抓拍](./documentary-sim/bystander-snapshot) | 纪实模拟 | 第三视角自然抓拍，主体清晰+旁观感 | 单版本 | — |
 | 14 | [伪纪录片老照片](./documentary-sim/mockumentary-photo) | 纪实模拟 | 粗粝真实的现场感纪实图像，真实感>美感 | 单版本 | — |
 | 15 | [报纸头条假新闻](./documentary-sim/fake-news-headline) | 纪实模拟 | 复古报纸头版+折痕质感+新闻摄影 | 单版本 | — |
+| 16 | [前端架构图](./frontend-engineering/01-frontend-architecture) | 前端工程 | 四层骨架一眼看清，模块级粒度 | 单版本 | — |
+| 17 | [模块依赖图](./frontend-engineering/02-module-deps) | 前端工程 | 内部导入拓扑，循环依赖红色高亮 | 单版本 | — |
+| 18 | [交互时序图](./frontend-engineering/03-sequence-diagram) | 前端工程 | 核心功能链路追踪，UI→API→Store→View | 单版本 | — |
+| 19 | [数据模型图](./frontend-engineering/04-data-model) | 前端工程 | Store/Context 状态字段与 Actions 关系 | 单版本 | — |
+| 20 | [状态机图](./frontend-engineering/05-state-machine) | 前端工程 | 组件交互状态流转，含异常分支 | 单版本 | — |
+| 21 | [页面路由流转图](./frontend-engineering/06-route-flow) | 前端工程 | 路由拓扑+守卫高亮+跳转方式标注 | 单版本 | — |
+| 22 | [权限路由守卫图](./frontend-engineering/07-auth-guard) | 前端工程 | 决策树：登录→角色→权限→拦截/放行 | 单版本 | — |
+| 23 | [外部依赖图](./frontend-engineering/08-external-deps) | 前端工程 | 三类依赖分类着色，升级风险评估 | 单版本 | — |
+| 24 | [组件生命周期图](./frontend-engineering/09-component-lifecycle) | 前端工程 | mount→unmount 完整时序 + 副作用顺序 | 单版本 | — |
+| 25 | [架构图通用皮肤规范](./frontend-engineering/skin-spec) | 前端工程 | 国产模型生图的颜色、布局、自适应公式 | 附录 | — |
 
 ## 按分类浏览
 
@@ -63,10 +73,30 @@
 | [伪纪录片老照片](./documentary-sim/mockumentary-photo) | 主题 → 现场证据感 | 主题内容 | 粗粝真实老照片 |
 | [报纸头条假新闻](./documentary-sim/fake-news-headline) | 新闻+人脸 → 报纸头版 | 新闻理由+报名 | 复古报纸头版图 |
 
+### 前端工程
+
+让 AI 深度分析前端项目源码，自动绘制架构图、依赖图、时序图、数据模型等可视化分析图，辅助前端工程师诊断项目健康度。核心特征：源码扫描 → 结构提取 → SVG 可视化 → 可沉淀至 CLAUDE.md。
+
+| 提示词 | 核心能力 | 输入 | 输出 |
+|--------|---------|------|------|
+| [前端架构图](./frontend-engineering/01-frontend-architecture) | 源码 → 四层架构骨架 | 前端项目 | 模块级架构图 SVG |
+| [模块依赖图](./frontend-engineering/02-module-deps) | 内部引用 → 拓扑 + 循环检测 | 前端项目 | 依赖拓扑 SVG |
+| [交互时序图](./frontend-engineering/03-sequence-diagram) | 代码检索 → 链路还原 | 功能名 | 时序图 SVG |
+| [数据模型图](./frontend-engineering/04-data-model) | Store/Context → 字段+Actions 关系 | 前端项目 | 数据模型关系图 SVG |
+| [状态机图](./frontend-engineering/05-state-machine) | 组件状态提取 → 完整流转 | 组件名 | 状态机图 SVG |
+| [页面路由流转图](./frontend-engineering/06-route-flow) | 路由表 → 跳转拓扑+守卫 | 前端项目 | 路由流转图 SVG |
+| [权限路由守卫图](./frontend-engineering/07-auth-guard) | 校验代码 → 决策树 | 前端项目 | 权限决策树 SVG |
+| [外部依赖图](./frontend-engineering/08-external-deps) | package.json → 三类依赖着色 | 前端项目 | 外部依赖关系图 SVG |
+| [组件生命周期图](./frontend-engineering/09-component-lifecycle) | 组件源码 → 完整时序 | 组件名 | 生命周期时序图 SVG |
+
+附：[架构图通用皮肤规范](./frontend-engineering/skin-spec) — 国产模型生图的颜色、布局、自适应公式。
+
 ## 使用说明
 
 - 每个提示词独立页面可直接复制全文使用
-- `{{}}` 或 `［］` 标识的为**用户输入变量**，使用前替换为实际内容
+- `【】` 标识的为**用户输入变量**（如 `【功能名】`、`【组件名】`），使用前替换为实际内容
+- `{{}}` 或 `［］` 标识的为**用户输入变量**（旧格式），使用前替换为实际内容
+- 前端工程类的提示词输出统一为 `.svg` 文件，建议将生成的图保存到 `./docs/` 并引用到 CLAUDE.md
 - 部分提示词含多个版本（如"无地面版"/"有地面版本"），页面内已分段标注
 - 截图栏暂标记为 `—`，后续将补充分类示例图片，方便快速预览效果
 
@@ -79,3 +109,4 @@
 | 2026-05-02 | 新增：第42卦益卦（䷩），六十四卦进度 42/64 |
 | 2026-05-02 | 新增：第43卦夬卦（䷪），六十四卦进度 43/64 |
 | 2026-05-13 | 完成：六十四卦全64卦，384爻提示词全部就位 ✅ |
+| 2026-05-21 | 新增：前端工程分类（9张分析图 + 皮肤规范），分类增至 5 大类 |

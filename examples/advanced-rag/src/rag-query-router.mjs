@@ -5,21 +5,32 @@ import { Annotation, END, START, StateGraph } from "@langchain/langgraph";
 import { Milvus } from "@langchain/community/vectorstores/milvus";
 
 const llm = new ChatOpenAI({
-  temperature: 0,
-  model: "qwen-plus",
-  configuration: {
-      baseURL: process.env.OPENAI_BASE_URL,
-  },
-  apiKey: process.env.OPENAI_API_KEY,
+    temperature: 0,
+    model: process.env.MODEL_NAME,
+    apiKey: process.env.OPENAI_API_KEY,
+    configuration: {
+        baseURL: process.env.OPENAI_BASE_URL,
+    },
+});
+
+// 路由专用：不带 thinking，支持 function calling
+const routerLlm = new ChatOpenAI({
+    temperature: 0,
+    model: "deepseek-v4-flash",   // ← 固定用非 thinking 模型
+    apiKey: process.env.OPENAI_API_KEY,
+    configuration: { baseURL: process.env.OPENAI_BASE_URL },
+    modelKwargs: {
+      thinking: { type: "disabled" },
+    },
 });
 
 const embeddings = new OpenAIEmbeddings({
-  model: "text-embedding-v3",
+  model: process.env.EMBEDDINGS_MODEL_NAME,
   dimensions: 1024,
   configuration: { 
-    baseURL: process.env.OPENAI_BASE_URL 
+    baseURL: process.env.EMBEDDINGS_URL 
   },
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.EMBEDDINGS_API_KEY,
 });
 
 const GraphState = Annotation.Root({
@@ -57,7 +68,10 @@ const RouteSchema = z.object({
 
 const routeQuestionNode = async (state) => {
   console.log("---ROUTE_QUESTION---");
-  const router = llm.withStructuredOutput(RouteSchema);
+  const router = routerLlm.withStructuredOutput(RouteSchema, {
+    method: "functionCalling",
+    name: "route_question",
+  });
   const route = await router.invoke(`
 你是问答路由器。请判断用户问题是否需要外部检索。
 
@@ -202,7 +216,7 @@ async function main() {
 
   console.log("连接到 Milvus...");
   vectorStore = await Milvus.fromExistingCollection(embeddings, {
-    collectionName: "ebook_collection",
+    collectionName: "ebook_jinyong_tianlongbabu",
     url: "localhost:19530",
     textField: "content",
     primaryField: "id",
@@ -218,7 +232,7 @@ async function main() {
   console.log("✓ 已连接\n");
 
   try {
-    await vectorStore.client.loadCollection({ collection_name: "ebook_collection" });
+    await vectorStore.client.loadCollection({ collection_name: "ebook_jinyong_tianlongbabu" });
     console.log("✓ 集合 ebook_collection 已加载\n");
   } catch (error) {
     if (!error.message.includes("already loaded")) {
