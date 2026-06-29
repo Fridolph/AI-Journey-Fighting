@@ -8,7 +8,7 @@ const weatherTable = {
   杭州: { summary: "多云转小雨", tempHighC: 22, tempLowC: 15, aqi: "良" },
   北京: { summary: "晴", tempHighC: 26, tempLowC: 12, aqi: "轻度污染" },
   上海: { summary: "阴", tempHighC: 20, tempLowC: 16, aqi: "良" },
-  成都: { summary: "多云", tempHighC: 29, tempLowC: 21, aqi: "中度污染" },
+  成都: { summary: "多云", tempHighC: 27, tempLowC: 22, aqi: "中高度污染" },
 };
 
 const triviaTable = {
