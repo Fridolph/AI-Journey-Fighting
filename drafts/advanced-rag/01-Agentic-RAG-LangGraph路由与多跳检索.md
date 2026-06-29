@@ -1,5 +1,7 @@
 # Agentic RAG：基于 LangGraph 实现大模型自主决策的 RAG 闭环
 
+> 📖 **深度学习笔记**：[02 — naive-rag 与 query-router：从固定管道到动态路由](./02-naive-rag-query-router.md) | [03 — 多跳检索与网络兜底：从一次检索到"会思考的检索"](./03-rag-multihop-web-fallback.md)
+
 ## 四个脚本的关系
 
 | 文件 | 核心思想 | 复杂度 |
