@@ -3,7 +3,7 @@ import mathjax3 from 'markdown-it-mathjax3'
 
 export default defineConfig({
   title: 'AI Journey Fighting',
-  description: 'AI学习之旅，记录成长的点点滴滴',
+  description: '霪霖笙箫 的 AI & 全栈学习之旅 · 记录成长',
   base: '/AI-Journey-Fighting/',
   lang: 'zh-CN',
 
@@ -16,7 +16,6 @@ export default defineConfig({
 
   themeConfig: {
     nav: [
-      { text: '首页', link: '/' },
       { text: '学习记录', link: '/agents/' },
       { text: '已发表文章', link: '/articles/' },
       { text: '提示词收藏', link: '/prompts/' },
@@ -166,13 +165,14 @@ export default defineConfig({
       ],
       '/articles/': [
         {
-          text: '已发表文章',
+          text: '系列一：Agent 设计模式系列',
+          collapsed: true,
           items: [
             { text: '文章总览', link: '/articles/' },
             { text: '一、提示链、路由、并行化', link: '/articles/2026-03-01__learn-ai-1/' },
             { text: '二、反思、工具使用、规划', link: '/articles/2026-03-02__learn-ai-2/' },
             { text: '三、多智能体、记忆管理与学习适应', link: '/articles/2026-03-08__learn-ai-3/' },
-            { text: '四、MCP：给AI工具世界造一个USB接口', link: '/articles/2026-03-12__learn-ai-4/' },
+            { text: '四、MCP：给 AI 工具世界造一个 USB 接口', link: '/articles/2026-03-12__learn-ai-4/' },
             { text: '五、目标、监控与容错', link: '/articles/2026-03-15__learn-ai-5/' },
             { text: '六、Human-in-the-Loop 设计', link: '/articles/2026-03-17__learn-ai-6/' },
             { text: '七、深入理解 RAG', link: '/articles/2026-03-17__learn-ai-7/' },
@@ -183,7 +183,28 @@ export default defineConfig({
             { text: '十二、RAG 知识库设计', link: '/articles/2026-04-04__learn-ai-12/' },
             { text: '十三、Agent 安全：给 AI 装上护栏', link: '/articles/2026-04-07__learn-ai-13/' },
             { text: '十四、从零推导 Multi-Agent 架构设计', link: '/articles/2026-04-10__learn-ai-14/' },
-            { text: '二十一、从零推导 Agent 工作机制', link: '/articles/2026-04-12__learn-ai-15/' }
+            { text: '十五、从零推导 Agent 工作机制', link: '/articles/2026-04-12__learn-ai-15/' },
+          ]
+        },
+        {
+          text: '系列二：AI Agent 全栈学习系列',
+          collapsed: true,
+          items: [
+            { text: '十六、从一份 Vue 简历到全栈 AI Monorepo 的重构之路', link: '/articles/2026-04-20__pre-prj-1/' },
+            { text: '十七、前端转全栈需了解的 Docker + CI/CD 核心知识', link: '/articles/2026-04-27__pre-prj-2/' },
+            { text: '十八、my-resume 上线实录：从踩坑到方法论', link: '/articles/2026-04-29__pre-prj-3/' },
+            { text: '十九、Prompt Template 周报生成——NestJS + LangChain 搭建第一个 AI Demo', link: '/articles/2026-05-01__prompt-template-report/' },
+            { text: '二十、数据库技术栈全景——7 种数据库一句话定位与选型决策', link: '/articles/2026-05-08__db-tech-stack/' },
+            { text: '二十一、数据库核心概念深入——索引、事务、锁、范式', link: '/articles/2026-05-09__db-concepts/' },
+            { text: '二十二、Prisma ORM 入门——用 TypeScript 的方式管理数据库', link: '/articles/2026-05-16__prisma-guide/' },
+            { text: '二十三、Card Learning Demo——全栈数据库学习项目的设计与实现', link: '/articles/2026-05-19__card-demo/' },
+            { text: '二十四、LangGraph 学习路径·上：从零到图 — 声明式编排的三原语', link: '/articles/2026-05-24__langgraph_1/' },
+            { text: '二十五、LangGraph 学习路径·中：记忆与暂停 — 让图成为有状态服务', link: '/articles/2026-05-27__langgraph_2/' },
+            { text: '二十六、LangGraph 学习路径·下：Agent 与多智能体 — 从工具调用到调度员模式', link: '/articles/2026-05-30__langgraph_3/' },
+            { text: '二十七、从查询扩展崩溃到混合检索跑通 — RAG 系统踩坑与修复实录', link: '/articles/2026-06-01__es-rerank_4/' },
+            { text: '二十八、ElasticSearch 基础 — 倒排索引、IK 分词、BM25 一次搞懂', link: '/articles/2026-06-06__es_1/' },
+            { text: '二十九、ElasticSearch 实战 — 建索引、CRUD、混合检索一条龙', link: '/articles/2026-06-08__es_2/' },
+            { text: '三十、混合检索 RAG — 多路召回 + Rerank 重排 + Agentic RAG 一次搞懂', link: '/articles/2026-06-10__agentic-rag_3/' },
           ]
         }
       ],

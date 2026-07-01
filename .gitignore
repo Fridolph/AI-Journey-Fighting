@@ -155,3 +155,11 @@ examples/resume-memory-rag-qa/**/.runtime/
 # Reasonix tools
 .codegraph/
 reasonix.toml
+
+# SQLite temporary files
+*.sqlite-shm
+*.sqlite-wal
+*.sqlite
+
+# External blog output
+blog-posts/

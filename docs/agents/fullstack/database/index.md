@@ -17,6 +17,7 @@
 | | [Redis 进阶](./redis-advanced) | Pub/Sub、Stream、持久化、分布式锁、Lua 脚本 |
 | **搜索引擎** | [Elasticsearch 基础](./elasticsearch-basics) | Kibana、全文搜索、Mapping、聚合 |
 | | [Elasticsearch 进阶](./elasticsearch-advanced) | IK 分词、向量搜索、RAG 集成、相关性调优 |
+| **向量型** | [Milvus 基础](./milvus-basics) | 向量数据库、语义检索、RAG 知识库 |
 | **浏览器端** | [IndexedDB](./indexeddb) | Dexie.js、浏览器存储全景、离线应用模式 |
 
 ## 全景对比
@@ -31,21 +32,22 @@
 | **MongoDB** | 文档型 NoSQL，灵活 Schema + 水平扩展 |
 | **Redis** | 内存数据结构服务器，缓存和实时场景标配 |
 | **Elasticsearch** | 分布式搜索引擎，全文搜索和向量检索专用 |
+| **Milvus** | 向量数据库，AI 语义检索和 RAG 知识库专用 |
 | **IndexedDB** | 浏览器端异步事务数据库，离线 Web 应用基石 |
 
 ### 多维对比
 
-| 维度 | MySQL | PostgreSQL | SQLite | MongoDB | Redis | Elasticsearch |
-|------|-------|------------|--------|---------|-------|---------------|
-| **类型** | 关系型 | 关系型 | 嵌入式关系型 | 文档型 NoSQL | 内存键值 | 搜索引擎 |
-| **数据模型** | 表+行 | 表+行 | 表+行 | 集合+文档 | 键值/数据结构 | 索引+文档 |
-| **SQL 标准** | 中等 | **最高** | 中高 | 有自己的 QL | 自己的命令 | Query DSL |
-| **事务** | ACID | ACID | ACID | 4.0+ ACID | 有限事务(Lua) | 无 |
-| **索引** | B-Tree/Fulltext | **B-Tree/Hash/GiST/GIN/BRIN** | B-Tree | B-Tree/Text/Geo/TTL | 无(内存直接访问) | **倒排索引/向量** |
-| **扩展** | 主从/分片 | 流复制/Patroni | 无 | 复制集/分片 | 主从/哨兵/集群 | 天然分布式 |
-| **部署** | 需服务端 | 需服务端 | **零配置** | 需服务端 | 需服务端 | 需服务端 |
-| **学习曲线** | 中 | 中高 | 低 | 中 | 低入门高精通 | 中高 |
-| **典型 QPS** | 1k~100k | 1k~100k | 1~1k（单机） | 1k~100k | **100k~1M** | 1k~100k |
+| 维度 | MySQL | PostgreSQL | SQLite | MongoDB | Redis | Elasticsearch | **Milvus** |
+|------|-------|------------|--------|---------|-------|---------------|------------|
+| **类型** | 关系型 | 关系型 | 嵌入式关系型 | 文档型 NoSQL | 内存键值 | 搜索引擎 | **向量数据库** |
+| **数据模型** | 表+行 | 表+行 | 表+行 | 集合+文档 | 键值/数据结构 | 索引+文档 | **Collection+Entity** |
+| **SQL 标准** | 中等 | **最高** | 中高 | 有自己的 QL | 自己的命令 | Query DSL | **无（API/SDK）** |
+| **事务** | ACID | ACID | ACID | 4.0+ ACID | 有限事务(Lua) | 无 | 无 |
+| **索引** | B-Tree/Fulltext | **B-Tree/Hash/GiST/GIN/BRIN** | B-Tree | B-Tree/Text/Geo/TTL | 无(内存直接访问) | 倒排索引/向量 | **向量索引（IVF/HNSW）** |
+| **扩展** | 主从/分片 | 流复制/Patroni | 无 | 复制集/分片 | 主从/哨兵/集群 | 天然分布式 | 天然分布式 |
+| **部署** | 需服务端 | 需服务端 | **零配置** | 需服务端 | 需服务端 | 需服务端 | 需服务端 |
+| **学习曲线** | 中 | 中高 | 低 | 中 | 低入门高精通 | 中高 | **中** |
+| **典型 QPS** | 1k~100k | 1k~100k | 1~1k（单机） | 1k~100k | **100k~1M** | 1k~100k | 1k~100k |
 
 ### 技术选型决策树
 
@@ -68,6 +70,9 @@
 ├─ 需要全文搜索、日志分析、RAG 语义检索
 │  └─ Elasticsearch
 │
+├─ 需要语义检索、AI 知识库、向量相似度搜索
+│  └─ Milvus
+│
 ├─ 浏览器端离线存储、PWA
 │  └─ IndexedDB
 │
@@ -82,10 +87,11 @@
 |------|---------|
 | 中小型 Web 应用 | MySQL + Redis |
 | 内容/社区/实时应用 | PostgreSQL + Redis + MongoDB（日志/行为数据） |
-| AI/RAG 知识库 | PostgreSQL（结构化数据）+ Elasticsearch（向量检索）+ Redis（缓存） |
+| AI/RAG 知识库 | PostgreSQL（结构化数据）+ Elasticsearch（词条检索）+ Milvus（语义检索）+ Redis（缓存） |
 | 离线桌面应用 | SQLite（本地存储） |
 | 离线 Web/PWA | IndexedDB + Cache API |
 | 实时分析/监控 | Elasticsearch + Redis |
+| 混合检索 RAG | Elasticsearch（词条匹配）+ Milvus（语义匹配）+ Rerank（重排序） |
 | 高并发社交/物联网 | MongoDB（水平分片）+ Redis（缓存/队列） |
 
 ## 学习建议

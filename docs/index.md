@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: "AI Journey Fighting"
-  text: "AI学习之旅 · 记录成长"
-  tagline: 从基础理论到实战落地，系统化学习AI知识体系，融合东方哲学与现代技术
+  text: "霪霖笙箫 的 AI & 全栈学习之旅 · 记录成长"
+  tagline: 从基础理论到实战落地，系统化学习AI知识体系，结合东方哲学思考，融合现代技术，走自己的道与 Dao。
   actions:
     - theme: brand
       text: 开始学习
@@ -42,6 +42,3 @@ features:
     details: 优质课程、论文、工具、开源项目推荐，站在巨人的肩膀上学习
     link: /agents/resources/
 ---
-
-> ☴ 最小的贞 × 持续 = 渗透力 ☴
-> 易师与你同行。

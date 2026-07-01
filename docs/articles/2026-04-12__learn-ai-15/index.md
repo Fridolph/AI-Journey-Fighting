@@ -1,5 +1,5 @@
 ---
-title: 「JS全栈AI学习」二十一、从零推导 Agent 工作机制
+title: 「JS全栈AI学习」十五、从零推导 Agent 工作机制
 date: 2026-04-12
 tags:
   - Agent
@@ -9,7 +9,7 @@ categories:
   - AI
 ---
 
-# 二十一、从零推导 Agent 工作机制
+# 十五、从零推导 Agent 工作机制
 
 > 📌 **系列简介**：「JS全栈AI Agent学习」系统学习 AI Agent 设计模式，篇数随学习进度持续更新。
 > 📖 **原书地址**：[adp.xindoo.xyz](https://adp.xindoo.xyz/)
