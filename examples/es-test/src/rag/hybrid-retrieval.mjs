@@ -217,7 +217,7 @@ export function compileHybridRetrievalGraph(esClient, milvus, reranker, chatMode
 const esClient = new Client({ node: "http://localhost:9200" });
 const embeddings = new OpenAIEmbeddings({
   model: "text-embedding-v3",
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.EMBEDDINGS_API_KEY,
   configuration: {
     baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
   },
@@ -229,7 +229,7 @@ const milvus = await Milvus.fromExistingCollection(embeddings, {
   vectorField: "embedding",
 });
 const reranker = new DashScopeRerank({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.RERANK_API_KEY,
   model: "qwen3-rerank",
   topN: 3,
   baseUrl:
@@ -237,7 +237,7 @@ const reranker = new DashScopeRerank({
 });
 
 const chatModel = new ChatOpenAI({
-  model: process.env.LLM_MODEL_NAME ?? "qwen-turbo",
+  model: process.env.MODEL_NAME ?? "qwen3.6-plus",
   apiKey: process.env.OPENAI_API_KEY,
   temperature: 0.2,
   configuration: {
@@ -261,17 +261,17 @@ console.log(drawable.drawMermaid());
 console.log();
 
 for (const query of SAMPLE_QUERIES) {
-  console.log(`query: ${query}`);
+  // console.log(`query: ${query}`);
 
   const state = await graph.invoke({ query });
 
   printQueryRewrite(state.query, state.queryAugmentation);
   console.log("\n（原始 JSON）", JSON.stringify(state.queryAugmentation));
 
-  printDocs("Elasticsearch 检索", state.esHits);
-  printDocs("Milvus 检索", state.milvusHits);
-  printDocs("重排后保留", state.topDocuments ?? []);
+  // printDocs("Elasticsearch 检索", state.esHits);
+  // printDocs("Milvus 检索", state.milvusHits);
+  // printDocs("重排后保留", state.topDocuments ?? []);
 
-  console.log("\n=== 大模型生成回答 ===\n");
-  console.log(state.answer ?? "");
+  // console.log("\n=== 大模型生成回答 ===\n");
+  // console.log(state.answer ?? "");
 }

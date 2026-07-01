@@ -63,7 +63,12 @@ async function seedData() {
     }
   ];
 
-  const operations = docs.flatMap((doc) => [{ index: { _index: INDEX_NAME } }, doc]);
+  // ★ 用 note_title 生成确定性 _id，避免重复写入
+  //   同标题 → 同 ID → ES 覆盖而非新增
+  const operations = docs.flatMap((doc) => [
+    { index: { _index: INDEX_NAME, _id: `note::${doc.note_title}` } },
+    doc,
+  ]);
   await client.bulk({ refresh: true, operations });
   console.log(`✅ 初始化数据完成，共 ${docs.length} 条`);
 }

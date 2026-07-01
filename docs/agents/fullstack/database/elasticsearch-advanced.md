@@ -182,6 +182,38 @@ GET /rag_docs/_search
 }
 ```
 
+### 混合检索架构（ES + Milvus 双通道）
+
+纯 ES 向量搜索足够应对大部分 RAG 场景，但实践中有一个关键问题：**术语/编号/代码不适合向量搜索**。比如搜 `errorCode=5001`，向量检索容易漂到 `5002`。
+
+更完善的架构是 ES + Milvus 双通道混合检索：
+
+```
+用户查询
+    │
+    ▼
+LLM 重写（扩展为多角度问句）
+    │
+    ├──→ ES 关键词检索（ik_smart 分词）──→ hits_es
+    │
+    └──→ Milvus 语义检索 ──→ hits_milvus
+              │
+              ▼
+         全量合并去重
+              │
+              ▼
+          Rerank（重排序）
+              │
+              ▼
+          LLM 作答
+```
+
+**ES 贡献**：精确术语、编号、代码等不适合向量化的查询，走词条匹配  
+**Milvus 贡献**：自然语言问句、模糊概念的语义相似度检索  
+**Rerank 解决**：两路检索取回的结果由 Rerank 模型做最终排序
+
+完整实现见 `examples/es-test/src/rag/hybrid-retrieval.mjs`（LangGraph 编排）。
+
 ### RAG 架构中的 ES 定位
 
 ```
@@ -247,4 +279,5 @@ PUT /books/_settings
 - [x] 熟悉了日期直方图和嵌套聚合
 - [x] 学会了 `dense_vector` + kNN 实现语义搜索
 - [x] 理解了 ES 在 RAG 架构中的核心定位（向量存储 + 语义检索）
+- [x] **理解了 ES + Milvus 混合检索架构：ES 做词条匹配、Milvus 做语义检索、Rerank 做最终排序**
 - [x] 掌握了批量写入和索引性能调优

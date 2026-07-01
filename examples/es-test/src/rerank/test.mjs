@@ -3,7 +3,7 @@ import { Document } from "@langchain/core/documents";
 import { DashScopeRerank } from "./dashscope-rerank.mjs";
 
 async function main() {
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = process.env.EMBEDDINGS_API_KEY;  // ★ 用 DashScope key，不是 DeepSeek
 
     const compressor = new DashScopeRerank({ apiKey, topN: 3 });
 

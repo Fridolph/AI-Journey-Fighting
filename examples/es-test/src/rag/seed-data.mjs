@@ -112,11 +112,11 @@ const ROWS = [
 ];
 
 const embeddings = new OpenAIEmbeddings({
-  apiKey: process.env.OPENAI_API_KEY,
+  // ★ embedding 必须用 DashScope（DeepSeek 不支持 embeddings）
+  apiKey: process.env.EMBEDDINGS_API_KEY,
   model: process.env.EMBEDDINGS_MODEL_NAME ?? 'text-embedding-v3',
   configuration: {
-    baseURL:
-      process.env.OPENAI_BASE_URL ??
+    baseURL: process.env.EMBEDDINGS_URL ??
       'https://dashscope.aliyuncs.com/compatible-mode/v1',
   },
 });

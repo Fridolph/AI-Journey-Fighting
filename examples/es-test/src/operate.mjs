@@ -10,6 +10,7 @@ async function createDocument() {
   const now = new Date().toISOString();
   const res = await client.index({
     index: INDEX_NAME,
+    id: `note::夜跑复盘`,       // ★ 确定性 ID，同标题不新增
     document: {
       note_title: '夜跑复盘',
       note_body: '今天夜跑 5 公里，配速稳定，结束后做了拉伸。',
@@ -54,7 +55,7 @@ async function searchDocuments() {
     query: {
       match: {
         note_body: {
-          query: '慢跑以及骑行的数据',
+          query: '慢跑和骑行',
           analyzer: 'ik_smart'
         }
       }
@@ -79,14 +80,14 @@ async function deleteDocument(docId) {
 
 async function run() {
   // const docId = await createDocument();
+  // const docId = '3u6-G58BMhBUXiRWzK2x';
   // await getDocument(docId);
   // console.log('docId', docId);
-  const docId = 'IeGE550BzfcVl_0hJv5m';
   // await updateDocument(docId);
   // await getDocument(docId);
-  // await searchDocuments();
+  await searchDocuments();
 
-  await deleteDocument(docId);
+  // await deleteDocument(docId);
 }
 
 run().catch((err) => {
