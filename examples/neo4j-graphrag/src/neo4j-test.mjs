@@ -72,7 +72,7 @@ async function deleteNode() {
 // 执行（你想运行哪个就打开哪个）
 // createData()
 // createRelation()
-queryData()
+// queryData()
 // updateData()
 // deleteRelation()
 // deleteNode()
