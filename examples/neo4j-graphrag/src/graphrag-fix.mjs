@@ -42,36 +42,56 @@ function userQuery(state) {
 }
 
 // ----------------------
+// 动态获取图谱上下文（Schema + 枚举值）
+// ----------------------
+let graphContext = ''
+
+async function buildGraphContext() {
+  await graph.refreshSchema()
+
+  // 并发查询每类节点的所有 name 值
+  const [products, types, ingredients, methods, peoples] = await Promise.all([
+    graph.query('MATCH (n:Product) RETURN collect(n.name) AS values'),
+    graph.query('MATCH (n:Type) RETURN collect(n.name) AS values'),
+    graph.query('MATCH (n:Ingredient) RETURN collect(n.name) AS values'),
+    graph.query('MATCH (n:Method) RETURN collect(n.name) AS values'),
+    graph.query('MATCH (n:People) RETURN collect(n.name) AS values'),
+  ])
+
+  return `
+图谱结构（Schema）：
+${graph.schema}
+
+节点现有数据（必须使用以下真实值，不得自行推断）：
+- Product: ${products[0].values.join('、')}
+- Type: ${types[0].values.join('、')}
+- Ingredient: ${ingredients[0].values.join('、')}
+- Method: ${methods[0].values.join('、')}
+- People: ${peoples[0].values.join('、')}
+  `.trim()
+}
+
+// ----------------------
 // 步骤1：生成 Cypher
 // ----------------------
 async function generateCypher(state) {
-    const prompt = `
-      你是一个专业的 Neo4j Cypher 生成器。
-      严格按照下面的结构生成正确语句，只返回纯 Cypher 代码，不要任何解释、不要标点、不要 markdown。
-  
-      节点：
-      - Product: 奶茶产品
-      - Ingredient: 配料
-      - Type: 奶茶类型
-      - Method: 制作工艺
-      - People: 适合人群
-  
-      关系方向（必须严格遵守）：
-      - (Product)-[:属于]->(Type)
-      - (Product)-[:包含]->(Ingredient)
-      - (Product)-[:适合]->(People)
-      - (Ingredient)-[:使用]->(Method)
-  
-      规则：
-      1. 关系方向绝对不能反
-      2. 多跳查询请使用多个 MATCH，不要连错路径
-      3. 只返回最终可运行的 Cypher 语句
-  
-      用户问题：${userQuery(state)}
-    `
-    const res = await llm.invoke([new HumanMessage(prompt)])
-    return { cypher: res.content }
-  }
+  const prompt = `
+你是一个专业的 Neo4j Cypher 生成器。
+只返回纯 Cypher 代码，不要任何解释、不要标点、不要 markdown。
+
+${graphContext}
+
+规则：
+1. 关系方向绝对不能反
+2. 多跳查询请使用多个 MATCH，不要连错路径
+3. 只返回最终可运行的 Cypher 语句
+4. 节点属性值必须使用上方「节点现有数据」中的真实值，不得自行推断
+
+用户问题：${userQuery(state)}
+  `
+  const res = await llm.invoke([new HumanMessage(prompt)])
+  return { cypher: res.content }
+}
 
 // ----------------------
 // 步骤2：执行图查询
@@ -90,12 +110,12 @@ async function executeGraphQuery(state) {
 // ----------------------
 async function generateAnswer(state) {
   const prompt = `
-    你是奶茶专家，根据下方「检索结果」回答用户问题；检索结果为空或不足时简要说明无法从图谱得到答案，不要编造。
-    回答要求：
-    - 直接列出事实，不要推断图谱里未出现的配料（如水、冰、添加剂等）。
+你是奶茶专家，根据下方「检索结果」回答用户问题；检索结果为空或不足时简要说明无法从图谱得到答案，不要编造。
+回答要求：
+- 直接列出事实，不要推断图谱里未出现的配料（如水、冰、添加剂等）。
 
-    检索结果：${state.context}
-    用户问题：${userQuery(state)}
+检索结果：${state.context}
+用户问题：${userQuery(state)}
   `
   const res = await llm.invoke([new HumanMessage(prompt)])
   return { answer: res.content }
@@ -140,16 +160,21 @@ async function runGraphRAG(question) {
 }
 
 // ======================
-// 测试
+// 入口
 // ======================
 ;(async () => {
+  // 启动时动态读取一次，后续所有问题复用
+  graphContext = await buildGraphContext()
+
+  console.log('=== 动态图谱上下文 ===')
+  console.log(graphContext)
+  console.log('-----------------------------------------------------------')
+
   await printWorkflowMermaid()
-  await graph.refreshSchema()
-  console.log('=== 图谱 Schema ===')
-  console.log(graph.schema)   // ← 先看输出
-  // await Promise.all([
-  //   runGraphRAG('我们这款珍珠奶茶有哪些配料？'),
-  //   runGraphRAG('台式奶茶的饮品都有哪些配料？'),
-  //   runGraphRAG('珍珠奶茶适合哪些人群饮用？'),
-  // ])
+
+  await Promise.all([
+    runGraphRAG('珍珠奶茶适合哪些人群饮用？'),
+    runGraphRAG('我们这款珍珠奶茶有哪些配料？'),
+    runGraphRAG('台式奶茶的饮品都有哪些配料？'),
+  ])
 })().catch(console.error)

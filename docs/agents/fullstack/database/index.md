@@ -6,18 +6,14 @@
 
 | 分类 | 文档 | 说明 |
 |------|------|------|
-| **关系型** | [MySQL 基础](./mysql-basics) | 环境搭建、Workbench、表设计、CRUD、用户权限、批量数据 |
-| | [MySQL 进阶](./mysql-advanced) | 字段设计、索引优化、聚合/JOIN、事务锁、慢查询 |
-| | [PostgreSQL 基础](./postgresql-basics) | psql/pgAdmin、schema 架构、特有类型、RETURNING 语法 |
-| | [PostgreSQL 进阶](./postgresql-advanced) | JSONB、高级索引、窗口函数、MVCC、PL/pgSQL、全文搜索 |
-| | [SQLite 基础](./sqlite-basics) | 嵌入式数据库、DB Browser、类型亲和性、对比与选型 |
-| **文档型** | [MongoDB 基础](./mongodb-basics) | 非关系型概念、Compass、CRUD、聚合管道 |
-| | [MongoDB 进阶](./mongodb-advanced) | 聚合管道、索引 ESR 规则、Schema 设计、事务、并发 |
-| **内存型** | [Redis 基础](./redis-basics) | 五大数据类型、Pipeline、旁路缓存模式 |
-| | [Redis 进阶](./redis-advanced) | Pub/Sub、Stream、持久化、分布式锁、Lua 脚本 |
-| **搜索引擎** | [Elasticsearch 基础](./elasticsearch-basics) | Kibana、全文搜索、Mapping、聚合 |
-| | [Elasticsearch 进阶](./elasticsearch-advanced) | IK 分词、向量搜索、RAG 集成、相关性调优 |
+| **关系型** | [MySQL](./mysql) | 环境搭建、CRUD、索引优化、事务锁 |
+| | [PostgreSQL](./postgresql) | psql/pgAdmin、JSONB、高级索引、全文搜索 |
+| | [SQLite 基础](./sqlite-basics) | 嵌入式数据库、DB Browser、类型亲和性 |
+| **文档型** | [MongoDB](./mongodb) | 非关系型概念、CRUD、聚合管道、Schema 设计 |
+| **内存型** | [Redis](./redis) | 五大数据类型、缓存模式、Pub/Sub、持久化 |
+| **搜索引擎** | [Elasticsearch](./elasticsearch) | 全文搜索、IK 分词、向量搜索、RAG 集成 |
 | **向量型** | [Milvus 基础](./milvus-basics) | 向量数据库、语义检索、RAG 知识库 |
+| **图数据库** | [Neo4j](./neo4j) | 图数据库、Cypher、GraphRAG、性能优化 |
 | **浏览器端** | [IndexedDB](./indexeddb) | Dexie.js、浏览器存储全景、离线应用模式 |
 
 ## 全景对比
@@ -33,6 +29,7 @@
 | **Redis** | 内存数据结构服务器，缓存和实时场景标配 |
 | **Elasticsearch** | 分布式搜索引擎，全文搜索和向量检索专用 |
 | **Milvus** | 向量数据库，AI 语义检索和 RAG 知识库专用 |
+| **Neo4j** | 图数据库，实体关联、多跳推理和知识图谱专用 |
 | **IndexedDB** | 浏览器端异步事务数据库，离线 Web 应用基石 |
 
 ### 多维对比
@@ -73,6 +70,9 @@
 ├─ 需要语义检索、AI 知识库、向量相似度搜索
 │  └─ Milvus
 │
+├─ 需要实体关联、多跳推理、知识图谱
+│  └─ Neo4j
+│
 ├─ 浏览器端离线存储、PWA
 │  └─ IndexedDB
 │
@@ -87,11 +87,11 @@
 |------|---------|
 | 中小型 Web 应用 | MySQL + Redis |
 | 内容/社区/实时应用 | PostgreSQL + Redis + MongoDB（日志/行为数据） |
-| AI/RAG 知识库 | PostgreSQL（结构化数据）+ Elasticsearch（词条检索）+ Milvus（语义检索）+ Redis（缓存） |
+| AI/RAG 知识库 | PostgreSQL（结构化数据）+ Elasticsearch（词条检索）+ Milvus（语义检索）+ Neo4j（知识图谱）+ Redis（缓存） |
 | 离线桌面应用 | SQLite（本地存储） |
 | 离线 Web/PWA | IndexedDB + Cache API |
 | 实时分析/监控 | Elasticsearch + Redis |
-| 混合检索 RAG | Elasticsearch（词条匹配）+ Milvus（语义匹配）+ Rerank（重排序） |
+| 混合检索 RAG | Elasticsearch（词条匹配）+ Milvus（语义匹配）+ Neo4j（关系图谱）+ Rerank（重排序） |
 | 高并发社交/物联网 | MongoDB（水平分片）+ Redis（缓存/队列） |
 
 ## 学习建议

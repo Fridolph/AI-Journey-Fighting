@@ -153,8 +153,60 @@ const answer = await llm.invoke(prompt);
 | 删除 | `delete` | 按 ID 或条件批量删 |
 | 加载 | `loadCollection` | 加载到内存才能搜索 |
 | 释放 | `releaseCollection` | 释放内存 |
+| 刷盘 | `flushSync` | 强制刷到磁盘持久化 |
 
 > 更新内容时必须**重新 Embedding**，否则会出现「内容和向量不匹配」的问题。
+
+### 完整示例：seed-data 模式
+
+用脚本批量灌数据，生产环境中嵌入 ES + Milvus 双写：
+
+```js
+// seed-data.mjs 核心流程
+const embeddings = new OpenAIEmbeddings({
+  apiKey: process.env.EMBEDDINGS_API_KEY,    // ← 必须用 DashScope，DeepSeek 不支持
+  model: "text-embedding-v3",
+  configuration: { baseURL: process.env.EMBEDDINGS_URL }
+});
+
+// ① 批量 Embedding
+const vectors = await embeddings.embedDocuments(texts);
+
+// ② 判重 → 删旧 → 建新
+if (await client.hasCollection({ collection_name: NAME })) {
+  await client.dropCollection({ collection_name: NAME });
+}
+
+// ③ createCollection + createIndex + loadCollection
+await client.createCollection({ collection_name: NAME, fields: [...] });
+await client.createIndex({ index_type: IndexType.HNSW, metric_type: MetricType.L2 });
+await client.loadCollection({ collection_name: NAME });
+
+// ④ 插入
+await client.insert({ collection_name: NAME, data: rows });
+
+// ⑤ 刷盘（类似 COMMIT）
+await client.flushSync({ collection_names: [NAME] });
+```
+
+### loadCollection 为什么必须
+
+Milvus 搜索是在**内存**里做的。没有 load：
+
+```
+createCollection ✅  insert ✅  flushSync ✅  search ❌ 报错
+loadCollection ✅   search ✅
+```
+
+类比：createIndex = 把书放进仓库，loadCollection = 搬到阅览室才能查阅。
+
+### 常见踩坑
+
+| 问题 | 根因 | 修复 |
+|------|------|------|
+| `404 MODEL_NOT_FOUND` | Embedding key 用 DeepSeek | 换 DashScope 的 EMBEDDINGS_API_KEY |
+| 中文报 ByteString 错误 | Node 25 undici 编码 bug | 换 Node 22 LTS |
+| `collection not loaded` | 忘了 loadCollection | insert 后加 loadCollection |
 
 ## Milvus vs Elasticsearch
 
@@ -194,3 +246,11 @@ docker compose -f milvus-standalone-docker-compose.yml up -d
 ---
 
 > 下一步可学习：Metadata 过滤（日期区间、标签筛选）、MySQL + Milvus 双写一致性策略、从 Demo 升级到知识库/记忆系统。
+
+---
+
+## 参考资源
+
+- [Milvus 官方文档](https://milvus.io/docs)
+- [PyMilvus SDK](https://github.com/milvus-io/pymilvus)
+
