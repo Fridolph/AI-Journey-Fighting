@@ -358,7 +358,119 @@ docker compose up -d
 
 ---
 
-## 十、代码文件
+## 十一、实战：my-resume 简历图谱设计
+
+### 11.1 从"表格思维"到"图思维"
+
+| 表格思维（MySQL） | 图思维（Neo4j） |
+|------------------|---------------|
+| 数据存在行列里 | 数据存在节点和关系里 |
+| 关联靠 JOIN | 关联靠 MATCH 路径 |
+| 问"这张表有什么字段" | 问"这个世界里有哪些实体和连接" |
+| 适合结构化统计 | 适合语义查询和推理 |
+
+### 11.2 设计原则：把简历读成一段话
+
+每条关系都对应一句自然语言：
+
+```
+付寅生 毕业于 四川大学锦江学院
+付寅生 有经历 [在网思科平的那段时光]
+[那段经历] 任职于 网思科平
+付寅生 参与 EDR项目
+EDR项目 使用 Vue3
+付寅生 擅长 前端核心能力
+Vue3 属于 前端核心能力
+付寅生 具备 AI工程化实践的亮点
+付寅生 兴趣 羽毛球
+```
+
+**每一条关系，都是一句自然语言。这就是检验关系设计好不好的标准。**
+
+### 11.3 最终节点和关系
+
+**9 种节点类型：**
+
+| 节点 | 说明 |
+|------|------|
+| `MR_Person` | 本人，含 name/title/location/email |
+| `MR_Technology` | 具体技术，从 experiences/projects 的 technologies[] 提取 |
+| `MR_Skill` | 技能分类标签，含 proficiency |
+| `MR_Company` | 就职公司，关联 `MR_Industry` |
+| `MR_Industry` | 行业领域 |
+| `MR_Experience` | 工作经历，含 role/startDate/endDate/summary |
+| `MR_Project` | 项目，含 coreFunctions/highlights |
+| `MR_School` | 教育背景 |
+| `MR_Interest` | 兴趣爱好 |
+
+**11 条关系：**
+
+| 关系 | 语义 |
+|------|------|
+| `(Person)-[:掌握]->(Technology)` | 我掌握了这项技术 |
+| `(Person)-[:擅长]->(Skill)` | 我擅长这个能力领域 |
+| `(Person)-[:有经历]->(Experience)` | 我有这段工作经历 |
+| `(Person)-[:参与]->(Project)` | 我参与了这个项目 |
+| `(Person)-[:毕业于]->(School)` | 我毕业于这所学校 |
+| `(Person)-[:兴趣]->(Interest)` | 我的兴趣爱好 |
+| `(Person)-[:具备]->(Highlight)` | 我具备这个亮点 |
+| `(Experience)-[:任职于]->(Company)` | 这段经历在哪家公司 |
+| `(Experience)-[:使用了]->(Technology)` | 这段经历中使用了什么技术 |
+| `(Project)-[:使用]->(Technology)` | 这个项目用了什么技术 |
+| `(Technology)-[:属于]->(Skill)` | 这项技术属于哪个能力分类 |
+
+### 11.4 Seed 脚本的核心思路
+
+```
+原始数据 (JSON)
+    ↓
+① 实体提取      从 experiences/projects/skills 提取所有名词
+    ↓
+② 数据清洗      "Nuxt 4" → "Nuxt"，去版本号，去重
+    ↓
+③ MERGE 建节点  幂等写入，跑多次不会重复
+    ↓
+④ MERGE 建关系  先有节点，再连线
+    ↓
+⑤ 统计验证      数量对不对？关系有没有断？
+```
+
+**MERGE 是关键**——语义是"存在就用，不存在就建"，保证脚本可以反复执行。
+
+### 11.5 设计关系时最容易忽略的一步
+
+**先想好"我会问什么问题"，再反推图模型能不能回答。**
+
+```cypher
+// 我用过哪些技术？
+MATCH (p:MR_Person)-[:掌握]->(t:MR_Technology) RETURN t.name
+
+// Neo4j 在哪个项目里用过？
+MATCH (proj:MR_Project)-[:使用]->(t:MR_Technology {name: 'Neo4j'}) RETURN proj.name
+
+// 我的前端能力包含哪些技术？
+MATCH (s:MR_Skill {name: '前端核心能力'})<-[:属于]-(t:MR_Technology) RETURN t.name
+
+// 我的完整职业路径？
+MATCH (p:MR_Person)-[:有经历]->(e:MR_Experience)-[:任职于]->(c:MR_Company)
+RETURN e.role, c.name, e.startDate, e.endDate
+```
+
+## 十二、通用图设计框架
+
+拿到任何新数据集，按这五步来：
+
+```
+1. 问：这里有哪些"实体"？（名词）
+2. 问：实体之间有哪些"关系"？（动词）
+3. 问：我将来会问什么"问题"？（查询场景）
+4. 反推：查询场景能否被图模型支撑？
+5. 迭代：跑脚本 → 验证 → 发现问题 → 改
+```
+
+**第 3 步最容易被忽略，但最重要——你的图谱是为了回答问题而存在的。**
+
+## 十三、代码文件
 
 | 文件 | 做什么 |
 |------|--------|

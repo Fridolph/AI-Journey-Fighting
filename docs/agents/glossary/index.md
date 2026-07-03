@@ -16,7 +16,7 @@
 |------|--------|
 | [Embedding](./embedding.md) | 把文字变成一串数字（向量），意思相近的词向量也相近 |
 | [HNSW](./hnsw.md) | 让向量检索从「遍历百万条」变成「跳 20 步就找到」的索引算法 |
-| [Milvus](./milvus.md) | 专门存向量、搜向量的数据库——RAG 的存储基座 |
+| [向量数据库](./vector-database.md) | 专门存向量、搜向量的数据库——RAG 的存储基座（Milvus/Qdrant/Chroma 等） |
 | [Rerank](./rerank.md) | 精排——粗召回后，用更强的模型把最相关的几条挑出来 |
 
 ## 混合检索
@@ -29,8 +29,6 @@
 
 | 概念 | 一句话 |
 |------|--------|
-| [Neo4j](./neo4j.md) | 图数据库——存实体和关系，查「A 和 B 什么关系」比 SQL 快千百倍 |
-| [Cypher](./cypher.md) | Neo4j 的查询语言——SQL 查表，Cypher 画图 |
 | [GraphRAG](./graphrag.md) | 在图谱上做 RAG——从查文档变成查关系，回答需要多跳推理的问题 |
 | [Agentic RAG](./agentic-rag.md) | 让 LLM 自己决定什么时候检索、查什么、查几次——RAG 的自主决策版 |
 
@@ -45,15 +43,14 @@
 
 | 概念 | 一句话 |
 |------|--------|
-| [SSE](./sse.md) | 服务端单向推送——ChatGPT 打字机效果的底层技术 |
-| [WebSocket](./websocket.md) | 服务端和客户端保持长连接双向通话——语音 Agent 的核心 |
+| [SSE](./sse.md) | 服务端单向推送——ChatGPT 打字机效果的底层技术（与 WebSocket 对比：SSE 单向，WS 双向） |
 | [Base64](./base64.md) | 二进制数据的「文字版」——让图片/音频能在 JSON 里传输 |
 
 ## 部署 & 工程化
 
 | 概念 | 一句话 |
 |------|--------|
-| [Docker](./docker.md) | 把应用和环境打包成「集装箱」——在哪跑都一样 |
+| [Docker](./docker.md) | 把应用和环境打包成「集装箱」——在哪跑都一样 → [进阶文档](../fullstack/devops/docker) |
 | [Docker Compose](./docker-compose.md) | 一个 YAML 描述所有服务——一条命令全部启动 |
 | [多阶段构建](./multi-stage-build.md) | 编译用重型工具，运行只留最小文件——给镜像瘦身 |
 | [ORM](./orm.md) | 用写代码的方式操作数据库——`user.save()` 代替 `INSERT INTO` |

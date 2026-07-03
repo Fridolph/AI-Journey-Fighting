@@ -228,3 +228,11 @@ const db = new Dexie('MyAppDB');
 - [x] 学会了索引声明语法（`++ / & / * / [a+b]`）
 - [x] 理解了离线应用的数据同步模式（synced 状态 + 批量同步）
 - [x] 建立了浏览器端存储选型的全景认知
+
+---
+
+## 参考资源
+
+- [MDN IndexedDB API](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API)
+- [Dexie.js 文档](https://dexie.org/docs/)
+

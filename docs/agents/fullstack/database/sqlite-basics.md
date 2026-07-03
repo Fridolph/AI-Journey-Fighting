@@ -452,3 +452,11 @@ SQLite 和 MySQL 不是非此即彼的关系，而是**互补工具链**：
 - [x] 学会了 SQLite 的**独有特性**（JSON 支持、FTS5 全文搜索、递归 CTE）
 - [x] 清楚了两者的**适用边界**：单机 vs 网络、低并发 vs 高并发
 - [x] 建立了**辩证的技术选型思维**——没有银弹，只有合适的场景
+
+---
+
+## 参考资源
+
+- [SQLite 官方文档](https://www.sqlite.org/docs.html)
+- [DB Browser for SQLite](https://sqlitebrowser.org/)
+

@@ -252,20 +252,38 @@ export default defineConfig({
           text: '全栈开发',
           collapsed: true,
           items: [
-            { text: '数据库总览与选型', link: '/agents/fullstack/database/' },
-            { text: '数据库核心概念', link: '/agents/fullstack/' },
-            { text: 'MySQL 基础', link: '/agents/fullstack/database/mysql-basics' },
-            { text: 'MySQL 进阶', link: '/agents/fullstack/database/mysql-advanced' },
-            { text: 'SQLite 基础', link: '/agents/fullstack/database/sqlite-basics' },
-            { text: 'PostgreSQL 基础', link: '/agents/fullstack/database/postgresql-basics' },
-            { text: 'PostgreSQL 进阶', link: '/agents/fullstack/database/postgresql-advanced' },
-            { text: 'MongoDB 基础', link: '/agents/fullstack/database/mongodb-basics' },
-            { text: 'MongoDB 进阶', link: '/agents/fullstack/database/mongodb-advanced' },
-            { text: 'Redis 基础', link: '/agents/fullstack/database/redis-basics' },
-            { text: 'Redis 进阶', link: '/agents/fullstack/database/redis-advanced' },
-            { text: 'Elasticsearch 基础', link: '/agents/fullstack/database/elasticsearch-basics' },
-            { text: 'Elasticsearch 进阶', link: '/agents/fullstack/database/elasticsearch-advanced' },
-            { text: 'IndexedDB', link: '/agents/fullstack/database/indexeddb' },
+            {
+              text: '数据库',
+              collapsed: true,
+              items: [
+                { text: '数据库总览与选型', link: '/agents/fullstack/database/' },
+                { text: '数据库核心概念', link: '/agents/fullstack/' },
+                { text: 'MySQL', link: '/agents/fullstack/database/mysql' },
+                { text: 'PostgreSQL', link: '/agents/fullstack/database/postgresql' },
+                { text: 'SQLite', link: '/agents/fullstack/database/sqlite-basics' },
+                { text: 'MongoDB', link: '/agents/fullstack/database/mongodb' },
+                { text: 'Redis', link: '/agents/fullstack/database/redis' },
+                { text: 'Elasticsearch', link: '/agents/fullstack/database/elasticsearch' },
+                { text: 'Milvus', link: '/agents/fullstack/database/milvus-basics' },
+                { text: 'Neo4j', link: '/agents/fullstack/database/neo4j' },
+                { text: 'IndexedDB', link: '/agents/fullstack/database/indexeddb' },
+              ]
+            },
+            {
+              text: '运维',
+              collapsed: true,
+              items: [
+                { text: 'Docker', link: '/agents/fullstack/devops/docker' },
+                { text: 'Nginx', link: '/agents/fullstack/devops/nginx' },
+              ]
+            },
+            {
+              text: '后端',
+              collapsed: true,
+              items: [
+                { text: 'NestJS', link: '/agents/fullstack/backend/nestjs' },
+              ]
+            },
           ]
         },
         {
@@ -276,23 +294,17 @@ export default defineConfig({
             { text: '倒排索引', link: '/agents/glossary/inverted-index' },
             { text: 'IK 分词器', link: '/agents/glossary/ik-analyzer' },
             { text: 'BM25', link: '/agents/glossary/bm25' },
+            { text: '向量数据库', link: '/agents/glossary/vector-database' },
             { text: 'Embedding', link: '/agents/glossary/embedding' },
             { text: 'HNSW', link: '/agents/glossary/hnsw' },
-            { text: 'Milvus', link: '/agents/glossary/milvus' },
             { text: 'Rerank', link: '/agents/glossary/rerank' },
             { text: '混合检索', link: '/agents/glossary/hybrid-search' },
-            { text: 'Neo4j', link: '/agents/glossary/neo4j' },
-            { text: 'Cypher', link: '/agents/glossary/cypher' },
             { text: 'GraphRAG', link: '/agents/glossary/graphrag' },
             { text: 'Agentic RAG', link: '/agents/glossary/agentic-rag' },
             { text: 'ReAct', link: '/agents/glossary/react' },
             { text: 'MCP', link: '/agents/glossary/mcp' },
             { text: 'SSE', link: '/agents/glossary/sse' },
-            { text: 'WebSocket', link: '/agents/glossary/websocket' },
             { text: 'Base64', link: '/agents/glossary/base64' },
-            { text: 'Docker', link: '/agents/glossary/docker' },
-            { text: 'Docker Compose', link: '/agents/glossary/docker-compose' },
-            { text: '多阶段构建', link: '/agents/glossary/multi-stage-build' },
             { text: 'ORM', link: '/agents/glossary/orm' },
             { text: 'Monorepo', link: '/agents/glossary/monorepo' },
           ]

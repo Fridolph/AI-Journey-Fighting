@@ -54,11 +54,14 @@ async function updateData() {
 // 5. 删除关系
 async function deleteRelation() {
   await session.run(`
-    MATCH (p:Product {name: "珍珠奶茶"})-[r:包含]->(i:Ingredient {name: "珍珠"})
+    MATCH (p:Product {name: "珍珠奶茶"})-[r:包含]->(i:Ingredient {name: "果糖"})
+    WITH r ORDER BY id(r)
+    SKIP 1
     DELETE r
   `)
-  console.log('删除关系成功')
+  console.log('删除重复关系成功')
 }
+
 
 // 6. 删除节点
 async function deleteNode() {
@@ -72,7 +75,7 @@ async function deleteNode() {
 // 执行（你想运行哪个就打开哪个）
 // createData()
 // createRelation()
-// queryData()
+queryData()
 // updateData()
 // deleteRelation()
 // deleteNode()
