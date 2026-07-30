@@ -163,3 +163,8 @@ reasonix.toml
 
 # External blog output
 blog-posts/
+
+# DeepAgents runtime workspaces
+examples/deepagents-test/src/deepagents/workspace-memory/
+examples/deepagents-test/src/deepagents/workspace-summarization/
+examples/deepagents-test/src/deepagents/output/
