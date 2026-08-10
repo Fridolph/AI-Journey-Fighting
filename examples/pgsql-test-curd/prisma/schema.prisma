@@ -1,0 +1,94 @@
+// ============================================================
+// Prisma Schema — 映射已存在的 users / conversations / messages 表
+//
+// 对照参考：src/conversations/entities/*.entity.ts（TypeORM 版）
+//
+// 填写规则：
+//   标有「★ 你来填」的地方是关键知识点，其他都是模板代码。
+//   每填一个，我会讲解为什么这样写 + 对照 TypeORM 的等价写法。
+// ============================================================
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// enum 映射数据库的 CHECK 约束（messages.role IN ('user','assistant','system')）
+// Prisma 的 enum 值默认保持原样，不需要 @map
+enum MessageRole {
+  user
+  assistant
+  system
+}
+
+// ────────────────────────────────────────────────────────────
+// model User（完整示范 —— 照着这个结构写下面两个）
+// 对照 TypeORM user.entity.ts：
+//   @@map("users")          ≈ @Entity('users')
+//   @default(autoincrement()) ≈ @PrimaryGeneratedColumn()
+//   @map("created_at")      ≈ @CreateDateColumn({ name: 'created_at' })
+//   conversations Conversation[] ≈ @OneToMany(() => Conversation, ...)
+// ────────────────────────────────────────────────────────────
+model User {
+  id            Int             @id @default(autoincrement())
+  name          String          @db.Text()
+  createdAt     DateTime        @default(now()) @db.Timestamptz() @map("created_at")
+  conversations Conversation[]
+
+  @@map("users")
+}
+
+// ────────────────────────────────────────────────────────────
+// model Conversation
+// 对照 TypeORM conversation.entity.ts：
+//   userId 列名映射        ≈ @Column({ name: 'user_id' })
+//   user 关系              ≈ @ManyToOne + @JoinColumn({ name: 'user_id' })
+//   onDelete: Cascade      ≈ { onDelete: 'CASCADE' }
+//
+// ★ 你来填 1：字段 userId 和关系 user 的 @relation 定义
+//   提示：Prisma 的关系声明方式 ——
+//     user   User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+//     userId Int   @map("user_id")
+//   对照 TypeORM：@ManyToOne + @JoinColumn({ name: 'user_id' }) 做的是同一件事
+// ────────────────────────────────────────────────────────────
+model Conversation {
+  id        Int            @id @default(autoincrement())
+  userId    Int            @map("user_id") // ★ 你来填 1a：补上 @relation 的 userId 端
+  title     String?        @db.Text()
+  createdAt DateTime       @default(now()) @db.Timestamptz() @map("created_at")
+  // ★ 你来填 1b：user 关系字段（User 类型 + @relation(fields:[userId], references:[id], onDelete: Cascade)）
+  // ★ 你来填 1c：messages 一对多字段（Message[]）
+  // ★ 你来填 1d：@@map("conversations")
+
+  @@map("conversations")
+}
+
+// ────────────────────────────────────────────────────────────
+// model Message
+// 对照 TypeORM message.entity.ts：
+//   role 字段用上面定义的 enum MessageRole
+//   embedding 用 Unsupported("vector(1024)") —— Prisma 不认 pgvector 类型，
+//     用 Unsupported 声明"这个列存在，但 Prisma 不管理它的类型"
+//
+// ★ 你来填 2：conversation 关系 + 相关字段
+//   提示：结构照 Conversation 的写法（外键 + @relation + 一对多反向字段）
+//   额外提示：embedding 字段 ——
+//     embedding Unsupported("vector(1024)")?
+//   对照 TypeORM：@Column('vector', { length: 1024, nullable: true })
+// ────────────────────────────────────────────────────────────
+model Message {
+  id             Int          @id @default(autoincrement())
+  conversationId Int          @map("conversation_id")
+  role           MessageRole
+  content        String       @db.Text()
+  // ★ 你来填 2a：embedding 字段（Unsupported("vector(1024)")?）
+  createdAt      DateTime     @default(now()) @db.Timestamptz() @map("created_at")
+  // ★ 你来填 2b：conversation 关系（Conversation 类型 + @relation(fields:[conversationId], references:[id], onDelete: Cascade)）
+  // ★ 你来填 2c：@@map("messages")
+
+  @@map("messages")
+}

@@ -10,9 +10,9 @@ function getEmbeddings() {
   if (!embeddings) {
     embeddings = new OpenAIEmbeddings({
       model: process.env.EMBEDDING_MODEL || "text-embedding-v3",
-      apiKey: process.env.OPENAI_API_KEY,
+      apiKey: process.env.EMBEDDINGS_API_KEY || process.env.OPENAI_API_KEY,
       configuration: {
-        baseURL: process.env.OPENAI_BASE_URL,
+        baseURL: process.env.EMBEDDINGS_URL || process.env.OPENAI_BASE_URL,
       },
     });
   }

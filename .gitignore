@@ -168,3 +168,8 @@ blog-posts/
 examples/deepagents-test/src/deepagents/workspace-memory/
 examples/deepagents-test/src/deepagents/workspace-summarization/
 examples/deepagents-test/src/deepagents/output/
+
+
+.agents
+.claude
+.windsurf
