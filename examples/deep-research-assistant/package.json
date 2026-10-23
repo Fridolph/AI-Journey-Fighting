@@ -6,7 +6,7 @@
   "description": "DeepAgents 深度调研助手实战项目",
   "scripts": {
     "start": "node src/cli.mjs",
-    "dev": "node src/cli.mjs"
+    "dev": "node ./src/todo-middleware-test.mjs"
   },
   "dependencies": {
     "@langchain/community": "^1.1.29",

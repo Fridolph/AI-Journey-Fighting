@@ -1,0 +1,143 @@
+// ============================================================
+// Prisma Schema —— 对照 TypeORM 版实体（src/conversations/entities/*.entity.ts）
+//
+// 本文件是**完整可运行版本**，每处关键定义都用注释标出了
+// 「TypeORM 里怎么写、Prisma 里怎么写、为什么不一样」。
+//
+// 概念对照表：
+//   ┌─────────────────────────┬────────────────────────────────┐
+//   │ TypeORM                 │ Prisma                         │
+//   ├─────────────────────────┼────────────────────────────────┤
+//   │ @Entity('users')        │ @@map("users")                 │
+//   │ @Column({name:'xx_yy'}) │ @map("xx_yy")                  │
+//   │ @PrimaryGeneratedColumn │ @id @default(autoincrement())  │
+//   │ @CreateDateColumn       │ @default(now()) @db.Timestamptz│
+//   │ @OneToMany              │ 反向字段（数组，无 @relation 参数）│
+//   │ @ManyToOne + @JoinColumn│ @relation(fields / references) │
+//   │ { onDelete: 'CASCADE' } │ onDelete: Cascade              │
+//   │ @Column('vector')       │ Unsupported("vector(1024)")    │
+//   └─────────────────────────┴────────────────────────────────┘
+// ============================================================
+
+generator client {
+  provider = "prisma-client"
+  // 生成产物放进 src/ 下，这样 tsconfig 能直接编译到
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  // 连接串在 prisma.config.ts 里从 .env 的 DATABASE_URL 读入
+  // （Prisma 7 的新方式：不再把 url 写在这里）
+}
+
+/// 消息角色 —— 对应 messages.role 的 CHECK 约束
+///
+/// 对照 TypeORM：`export enum MessageRole { USER = 'user', ... }`
+/// （message.entity.ts）。注意 Prisma 的 enum 值不需要 @map，
+/// 因为枚举名和数据库里的字符串值一致。
+enum MessageRole {
+  user
+  assistant
+  system
+}
+
+/// 用户模型 —— 映射 users 表
+///
+/// 对照 TypeORM：`src/conversations/entities/user.entity.ts`
+///
+/// ```ts
+/// @Entity('users')                           →  @@map("users")
+/// @PrimaryGeneratedColumn() id               →  @id @default(autoincrement())
+/// @Column({ type: 'text' }) name             →  name String @db.Text()
+/// @CreateDateColumn({ name: 'created_at' })  →  createdAt DateTime @default(now()) @db.Timestamptz() @map("created_at")
+/// @OneToMany(() => Conversation, ...)        →  conversations Conversation[]
+/// ```
+model User {
+  id            Int            @id @default(autoincrement())
+  name          String         @db.Text()
+  createdAt     DateTime       @default(now()) @db.Timestamptz() @map("created_at")
+
+  /// 反向关系字段：不落库，仅用于表达「一个用户有多个会话」
+  /// （对应 TypeORM 的 @OneToMany，同样不产生数据库列）
+  conversations Conversation[]
+
+  @@map("users")
+}
+
+/// 会话模型 —— 映射 conversations 表
+///
+/// 对照 TypeORM：`src/conversations/entities/conversation.entity.ts`
+model Conversation {
+  id        Int      @id @default(autoincrement())
+
+  /// 外键列：TS 驼峰 userId → 数据库蛇形 user_id
+  /// 对照 TypeORM：@Column({ name: 'user_id' })
+  userId    Int      @map("user_id")
+
+  /// 可空字段：String? 里的 ? 等价于 TypeORM 的 nullable: true
+  title     String?  @db.Text()
+
+  createdAt DateTime @default(now()) @db.Timestamptz() @map("created_at")
+
+  /// 所属用户（多对一，**关系的拥有端**）
+  ///
+  /// 对照 TypeORM：
+  /// ```ts
+  /// @ManyToOne(() => User, u => u.conversations, { onDelete: 'CASCADE' })
+  /// @JoinColumn({ name: 'user_id' })
+  /// user: User
+  /// ```
+  /// Prisma 把 @ManyToOne + @JoinColumn 合并成一个 @relation：
+  /// - fields: 指向**本模型**的外键字段（userId）
+  /// - references: 指向**对方模型**的主键（User.id）
+  /// - onDelete: Cascade ≈ TypeORM 的 { onDelete: 'CASCADE' }
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// 该会话下的消息（一对多，反向端）
+  /// 对照 TypeORM：@OneToMany(() => Message, m => m.conversation)
+  messages  Message[]
+
+  @@map("conversations")
+}
+
+/// 消息模型 —— 映射 messages 表（本项目最关键的表）
+///
+/// 它同时承担两种能力：
+/// 1. 关系查询：挂在 conversation 下（多对一的「多」端）
+/// 2. 向量检索：embedding 列做最近邻搜索（pgvector）
+///
+/// 对照 TypeORM：`src/conversations/entities/message.entity.ts`
+model Message {
+  id             Int         @id @default(autoincrement())
+
+  /// 外键列 → conversation_id
+  conversationId Int         @map("conversation_id")
+
+  /// 使用上面定义的 enum 类型（对应 TypeORM 的 enum: MessageRole）
+  role           MessageRole
+
+  content        String      @db.Text()
+
+  /// 向量列 —— pgvector 扩展类型
+  ///
+  /// **这是 Prisma 与 pgvector 的唯一接缝**：
+  /// Prisma 没有 vector 原生类型，用 `Unsupported(...)` 表示
+  /// 「这一列确实存在，但类型由数据库自己管，Prisma 不参与生成/校验」。
+  ///
+  /// 对照 TypeORM：@Column('vector', { length: 1024, nullable: true })
+  ///
+  /// 两个注意点：
+  /// 1. 末尾的 `?` 表示可空（对应 nullable: true）
+  /// 2. `Unsupported` 字段**不会**出现在普通查询结果里（这也顺带
+  ///    避免了把 1024 维数组返回给前端），只能通过 $queryRaw 访问
+  embedding      Unsupported("vector(1024)")?
+
+  createdAt      DateTime    @default(now()) @db.Timestamptz() @map("created_at")
+
+  /// 所属会话（多对一，拥有端）
+  /// 对照 TypeORM 的 @ManyToOne + @JoinColumn({ name: 'conversation_id' })
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}

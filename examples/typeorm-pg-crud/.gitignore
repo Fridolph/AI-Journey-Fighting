@@ -55,4 +55,5 @@ pids
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
-/generated/prisma
+# Prisma 生成的 client（由 `pnpm prisma generate` 重新生成，不入库）
+/src/generated
