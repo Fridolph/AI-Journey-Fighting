@@ -11,3 +11,10 @@ Dependency Injection，依赖注入，是一种用于实现 IoC 的设计模式�
 
 依赖注入允许在类外创建依赖对象，并通过不同的方式将这些对象提供给类。
 
+### DI 容器工作原理
+
+- 注册所有有 @Injectable() 注解的类
+- 通过 Constructor 了解类与类之间的依赖关系
+- Nestjs自动创建 @Injectable() 注解的类的实例
+- Nestjs 自动创建依赖关系的实例
+- 按需进行调用
