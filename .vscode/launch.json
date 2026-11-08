@@ -5,9 +5,9 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug nestjs-demo",
+            "name": "Debug nestjs-server",
             "request": "launch",
-            "cwd": "${workspaceFolder}/nestjs-demo",
+            "cwd": "${workspaceFolder}/nestjs-server-temp",
             "runtimeArgs": [
                 "run",
                 "start:debug"
