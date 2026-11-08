@@ -68,3 +68,46 @@
 - 新增学习记录时优先复用现有目录结构，保持一致性。
 - README、`docs/` 结构发生方向性变化时，同步更新说明文档。
 - 修改尽量小而清晰，不做与当前学习任务无关的大改动。
+
+## 7. 前端请求分层与 Pinia Colada 约定
+
+适用于 `nestjs-nuxt-admin-temp`，新增其他 Nuxt 项目时默认沿用。
+完整讨论过程见 `drafts/nestjs-fullstack/01-前端请求分层与-Pinia-Colada-约定.md`。
+
+### 7.1 分层
+
+```text
+页面（只做编排：URL ⇄ 查询参数、弹层开关）
+  └─ composables/use<Resource>.ts（查询 + 写操作 + 缓存失效 + 派生状态）
+       └─ types/<resource>.ts（领域类型）
+            └─ plugins/api.ts（传输层：baseURL、请求头、错误归一化 → $api）
+```
+
+### 7.2 硬性规则
+
+1. **不写 HTTP 动词转发封装**（`get/post/patch/remove` 之类）。它不消除重复也不增加约束。
+2. **不预支领域层**：同一接口只有一个调用点时，不要单列 `api/<resource>.ts`；出现第二个调用点（详情页、预取、服务端 loader）时再抽。
+3. **传输层必须存在**：baseURL、公共请求头、错误归一化集中在一个 Nuxt plugin，产物为 `$api`；HTTP 错误与「HTTP 200 + 业务码 >= 400」都要转成异常。
+4. **查询与写操作按资源合并**为 `use<Resource>`；出现第二个资源、或写操作超过 5 个、或其他页面只需列表时再拆。
+5. **命名用「动词 + 资源」**：`createUser` 而不是 `create`；不加冗余修饰（不写 `createNewUser`）。
+6. **派生展示值跟随数据**：用响应里的 `pagination.page` 计算「显示 1–5 条」，不要用 URL 里的 `page`。
+
+### 7.3 Colada 必备项
+
+- `key` 写成 getter，页码等分页参数进 key；失效用前缀 `invalidateQueries({ key: ["<resource>"] })`。
+- 分页查询必须配 `placeholderData: previousData => previousData`，避免翻页闪空。
+- 写操作在 `onSuccess` 里失效缓存并提示；失败不吞，写入 `mutation.error`。
+- `refresh()` 尊重 `staleTime`，`refetch()` 强制重发；手动刷新按钮用 `refetch()`。
+
+### 7.4 必备的加载与错误态
+
+| 场景 | 表现 |
+| --- | --- |
+| 首次加载 | 骨架屏 + `aria-busy` |
+| 翻页 / 刷新 | 保留旧数据 + loading 态 |
+| 列表失败 | 错误卡片 + 「重试」 |
+| 写操作失败 | 就地提示（抽屉 / 弹窗内） |
+
+### 7.5 变更流程
+
+修改上述约定时：先更新 `drafts/nestjs-fullstack/` 里的记录，再改本节，最后同步项目 README。三处不一致视为文档缺陷。
