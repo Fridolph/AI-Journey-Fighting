@@ -101,7 +101,7 @@ plugins/api.ts                 传输层：baseURL、请求头、错误归一化
 | 翻页 / 刷新 | 保留旧数据 + 表格 loading | 有 `placeholderData`，不该闪空 |
 | 列表请求失败 | 错误卡片 + 「重试」按钮 | 可恢复错误要给出口 |
 | 创建 / 编辑失败 | 抽屉内就地提示 | 错误离操作最近 |
-| 删除失败 | 确认弹窗内就地提示 | 同上 |
+| 删除失败 | **toast** 提示「删除失败，列表已恢复」 | 删除走乐观更新，弹窗已立即收起，错误只能落到全局 |
 | 写成功但刷新失败 | warning toast，不当作写失败 | 数据已落库，刷新失败是另一层问题 |
 
 连续点击保护：`saving` / `deleting` 期间直接 return，避免重复提交。
@@ -124,8 +124,104 @@ plugins/api.ts                 传输层：baseURL、请求头、错误归一化
 - 需要脱离 Nuxt 上下文对该接口写单测；
 - 接口路径或响应包装需要在多处保持一致，靠约定已经守不住。
 
-## 9. 下一步
+## 9. 乐观删除（2026-11-08 实践）
 
-1. **乐观更新**：删除时先 `setQueryData` 移除行，失败用 `onMutate` 的 context 回滚——Colada 体验优化里收益最高的一项。
-2. `defineQueryOptions` / `defineQuery` 的引入时机：同一 `key` 被两个同时挂载的组件使用时。
-3. 预取：hover 分页器时 `queryCache.ensure` 预拉下一页。
+### 9.1 四步法，缺一不可
+
+```ts
+useMutation({
+	// ① 请求发出前：取消在途请求 → 快照 → 先改缓存
+	onMutate(id) {
+		queryCache.cancelQueries({ key: ['users'] })
+		const snapshots = snapshotUsersCache()
+		removeUserFromCache(id)
+		return { snapshots }
+	},
+	// ② 真正的请求
+	mutation: id => api(`/users/${id}`, { method: 'DELETE' }),
+	// ③ 失败：用快照整体回滚
+	onError(error, _id, context) {
+		for (const s of context?.snapshots ?? []) queryCache.setQueryData(s.key, s.data)
+		toast.add({ title: '删除失败，列表已恢复', description: error.message, color: 'error' })
+	},
+	// ④ 成功：失效并重拉
+	async onSuccess() {
+		toast.add({ title: '用户已删除', color: 'success' })
+		await queryCache.invalidateQueries({ key: ['users'] })
+	},
+})
+```
+
+逐条理由：
+
+1. **`cancelQueries` 必须第一个做**。分页查询可能在途（翻页、刷新），它回来的旧数据会直接覆盖掉乐观修改，表现为"删掉的行又回来了"。
+2. **快照要覆盖所有缓存页，不只是当前页**。回滚时逐页写回，否则切页会看到半新半旧的数据。
+3. **`total` 每页都要减一**。分页不重叠，目标行只在一页里，但 `total` 在每个分页响应里都有一份；只改当前页的话，切到别的缓存页数字会跳。
+4. **乐观更新不能替代重拉**。删掉一行会让后面所有页的数据前移，新的分页边界只有服务端知道。所以 `onSuccess` 里仍然要 `invalidateQueries`。
+
+### 9.2 被问到的那个场景：末页最后一条
+
+这是乐观删除最容易出问题的地方，实际要处理三件事：
+
+**（1）`total` 先减一，`lastPage` 立刻变小**
+
+```ts
+const lastPage = computed(() => Math.max(1, Math.ceil(total.value / displaySize.value)))
+```
+
+第 3 页只有 1 条、`size=5`、`total=11` 时删掉它：乐观 `total` 变 10 → `lastPage` 变 2 → 已知"当前页已越界"。
+
+**（2）页码只能在删除成功后才收回**
+
+如果一发现越界就 `navigateTo`，删除失败回滚后会出现"跳到第 2 页又跳回来"。所以 watcher 要拿 `deleting` 做闸门，并且把 `deleting` 本身也放进依赖——删除结束那一刻需要再跑一次，把迟到的判断补上：
+
+```ts
+watch([displayPage, lastPage, deleting], ([dataPage, last, isDeleting]) => {
+	if (import.meta.server || isDeleting || dataPage !== page.value) return
+	if (dataPage > last) void goToPage(last)
+}, { immediate: true })
+```
+
+**（3）不能让「暂无用户数据」闪出来**
+
+末页被清空到成功收回页码之间，`users.length === 0` 且 `status === 'success'`，空状态提示会闪一下。用两个条件挡住：
+
+```ts
+const isEmpty = computed(() =>
+	status.value === 'success' && !deleting.value &&
+	users.value.length === 0 && displayPage.value <= lastPage.value
+)
+```
+
+同时在「没有行」时隐藏分页条——此时它只剩一个 0 行的范围文案，没有意义。
+
+**（4）顺带修掉的文案问题**
+
+「显示 X–Y 条」不能再用 `页码 × 每页条数` 推算，因为乐观删除后行数比公式少一条。改成按实际行数推算：
+
+```ts
+const firstItem = computed(() => users.value.length ? (displayPage.value - 1) * displaySize.value + 1 : 0)
+const lastItem = computed(() => users.value.length ? firstItem.value + users.value.length - 1 : 0)
+```
+
+### 9.3 交互上的取舍
+
+**确认即关弹窗**。乐观更新的价值就是"不等服务端"，如果弹窗还压着等 loading，乐观就没意义了。代价是失败时错误只能走 toast——这对删除是可接受的（行会自己回来，用户能立刻看到）。
+
+对比：创建 / 编辑**不做**乐观，因为需要服务端生成的 id 与唯一性校验，且抽屉内就地报错的信息量更大。
+
+### 9.4 验证记录（限速 800ms，真实后端）
+
+| 场景 | 预期 | 实测 |
+| --- | --- | --- |
+| 末页最后一条，确认后 200ms | 行立即消失、`total` 已减一、页码暂不跳 | `total: 共 10 条`、范围文案消失、仍停在 `page=3` |
+| 删除成功后 | 自动收回第 2 页 | `?size=5&page=2`、5 行、`显示 6–10` |
+| 普通页删除，确认后 200ms | 行立即消失、`total` 减一 | 10 行 → 9 行、`共 9 条`、`显示 1–9` |
+| 删除失败（外键约束） | 行回到原位 + toast | 9 行 → 10 行、`删除失败，列表已恢复` |
+| 控制台 | 无 error / warning | 无 |
+
+## 10. 下一步
+
+1. `defineQueryOptions` / `defineQuery` 的引入时机：同一 `key` 被两个同时挂载的组件使用时。
+2. 预取：hover 分页器时 `queryCache.ensure` 预拉下一页。
+3. 删除成功后的"多余一次请求"：末页清空时，失效重拉会先拉一次即将离开的空页，再拉上一页。可以在 `onSuccess` 里判断并跳过空页的重拉。
